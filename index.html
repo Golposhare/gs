@@ -46,7 +46,29 @@
             padding: 0 15px;
         }
 
-        /* --- UPDATED: VERIFIED BADGE STYLE --- */
+        /* GLOBAL LOADER */
+        #global-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--surface);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Verified Badge */
         .verified-badge {
             color: #1e88e5;
             font-size: 14px;
@@ -54,7 +76,28 @@
             vertical-align: middle;
             display: inline-block;
         }
-        /* -------------------------------- */
+        
+        /* Recommended Badge */
+        .rec-badge {
+            background-color: var(--primary-light);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+            font-weight: normal;
+        }
+        
+        .pending-badge {
+            background-color: #FFA500;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
 
         /* Toast Notification */
         #toast-container {
@@ -150,7 +193,9 @@
         }
 
         .btn {
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             background-color: var(--primary);
             color: white;
             border: none;
@@ -172,6 +217,20 @@
             background-color: #aaa;
             cursor: not-allowed;
         }
+
+        .btn-loading .btn-text {
+            display: none;
+        }
+        .btn-loading .btn-spinner {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        .btn-spinner { display: none; }
 
         .btn-outline {
             background-color: transparent;
@@ -311,6 +370,7 @@
             text-decoration: none;
             border-bottom: 1px solid #eee;
             transition: all 0.2s;
+            cursor: pointer;
         }
 
         .dropdown-item:last-child {
@@ -333,53 +393,37 @@
             padding-bottom: 80px;
         }
 
-        .create-post {
+        /* CREATE POST TRIGGER */
+        .create-post-trigger-box {
             background-color: var(--surface);
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .post-input {
-            width: 100%;
-            border: none;
-            padding: 12px 5px;
-            font-size: 16px;
-            resize: none;
-            margin-bottom: 10px;
-            outline: none;
-        }
-
-        .post-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
-
-        .action-btn {
             display: flex;
             align-items: center;
-            color: var(--text-light);
-            background: none;
-            border: none;
             cursor: pointer;
-            font-size: 14px;
-            padding: 8px;
-            border-radius: 6px;
-            transition: background-color 0.2s;
         }
-        .action-btn:hover {
-            background-color: #f0f0f0;
+        .trigger-user-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .trigger-input-fake {
+            background-color: #f0f2f5;
+            border-radius: 20px;
+            padding: 10px 20px;
+            flex-grow: 1;
+            color: #65676b;
+            font-size: 15px;
+        }
+        .trigger-input-fake:hover {
+            background-color: #e4e6e9;
         }
 
-        .action-btn i {
-            margin-right: 5px;
-            color: var(--success);
-        }
-
+        /* POST STYLES */
         .post {
             background-color: var(--surface);
             border-radius: 12px;
@@ -393,6 +437,7 @@
             display: flex;
             align-items: center;
             padding: 15px;
+            position: relative;
         }
 
         .post-user-pic {
@@ -417,6 +462,42 @@
             font-size: 12px;
             color: var(--text-light);
         }
+
+        /* 3-DOT MENU */
+        .post-menu-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 5px;
+        }
+        .post-menu-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            width: 150px;
+            display: none;
+            z-index: 5;
+            overflow: hidden;
+        }
+        .post-menu-dropdown.show { display: block; }
+        .post-menu-item {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--text);
+        }
+        .post-menu-item:hover { background: #f5f5f5; }
+        .post-menu-item i { margin-right: 8px; width: 15px; text-align: center; }
 
         .post-content {
             padding: 0 15px 15px;
@@ -550,7 +631,6 @@
             position: relative;
             cursor: default;
         }
-        /* Clickable cover photo for self */
         .cover-photo.editable {
             cursor: pointer;
         }
@@ -574,9 +654,13 @@
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid var(--surface);
-            cursor: pointer;
+            cursor: default;
             display: inline-block;
             background: #eee;
+        }
+        
+        .profile-pic-large.editable {
+            cursor: pointer;
         }
 
         .profile-details {
@@ -859,6 +943,53 @@
             margin: 10px 0;
         }
 
+        /* Add Money & Subscription */
+        .payment-method-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        .wmt-id-box {
+            background: #fff;
+            border: 1px dashed var(--primary);
+            padding: 10px;
+            text-align: center;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .status-pending { color: #ff9800; font-weight: bold; font-size: 12px;}
+        .status-approved { color: #4caf50; font-weight: bold; font-size: 12px;}
+        .status-rejected { color: #f44336; font-weight: bold; font-size: 12px;}
+        
+        /* Withdraw Styles */
+        .fee-info {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 5px;
+        }
+        .net-amount-display {
+            font-weight: bold;
+            color: var(--success);
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
         /* MODALS */
         .modal-overlay {
             position: fixed;
@@ -924,9 +1055,55 @@
             display: none;
             z-index: 5;
         }
+        
+        /* --- NEW POST MODAL --- */
+        .create-post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .create-post-input-area {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            min-height: 100px;
+            resize: none;
+            margin-bottom: 10px;
+        }
+        .image-preview-area {
+            width: 100%;
+            max-height: 200px;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .image-preview-area img {
+            width: 100%;
+            object-fit: cover;
+        }
+        .modal-post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        .add-photo-btn {
+            color: var(--success);
+            cursor: pointer;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- GLOBAL LOADER to Prevent Flicker -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+        <div style="color: var(--primary); font-weight: bold;">GolpoShare</div>
+    </div>
+
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
@@ -971,14 +1148,17 @@
                     <label for="cover-photo-signup">কভার ফটো</label>
                     <input type="file" id="cover-photo-signup" class="form-control" accept="image/*">
                 </div>
-                <button type="submit" class="btn">সাইন আপ</button>
+                <button type="submit" class="btn" id="signup-btn">
+                    <span class="btn-text">সাইন আপ</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </form>
             <p class="text-center mt-3">ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" id="go-to-login">লগইন করুন</a></p>
         </div>
     </div>
 
     <!-- Login Page (Default) -->
-    <div id="login-page" class="auth-container">
+    <div id="login-page" class="auth-container d-none">
         <div class="auth-card">
             <div class="logo">
                 <h1>GolpoShare</h1>
@@ -993,7 +1173,10 @@
                     <label for="login-password">পাসওয়ার্ড</label>
                     <input type="password" id="login-password" class="form-control" placeholder="পাসওয়ার্ড লিখুন" required>
                 </div>
-                <button type="submit" class="btn">লগইন</button>
+                <button type="submit" class="btn" id="login-btn">
+                    <span class="btn-text">লগইন</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </form>
             <p class="text-center mt-3">অ্যাকাউন্ট নেই? <a href="#" id="go-to-signup">সাইন আপ করুন</a></p>
         </div>
@@ -1031,16 +1214,12 @@
     <div id="home-page" class="d-none app-view">
         <div class="container">
             <div class="newsfeed" id="newsfeed-container">
-                <div class="create-post">
-                    <textarea id="post-text-input" class="post-input" placeholder="আপনার মনে কি আছে?..."></textarea>
-                    <input type="file" id="post-image-input" accept="image/*" style="display: none;">
-                    <div class="post-actions">
-                        <div>
-                            <button class="action-btn" id="add-image-btn"><i class="fas fa-image"></i> ছবি যোগ করুন</button>
-                        </div>
-                        <button class="btn" id="create-post-btn" style="width: auto; padding: 8px 20px;">পোস্ট করুন</button>
-                    </div>
+                <!-- New Create Post Trigger -->
+                <div class="create-post-trigger-box" id="create-post-trigger">
+                    <img src="" class="trigger-user-pic" id="trigger-user-pic">
+                    <div class="trigger-input-fake">আপনার মনে কি আছে?</div>
                 </div>
+                
                 <!-- Posts loaded here -->
             </div>
         </div>
@@ -1147,6 +1326,9 @@
                 <div class="dropdown-item" id="open-name-modal" style="cursor: pointer;">
                     <i class="fas fa-user-edit"></i> নাম পরিবর্তন করুন
                 </div>
+                <a href="#" id="go-to-hidden" class="dropdown-item" style="padding-left: 0; color: var(--text);">
+                    <i class="fas fa-eye-slash"></i> Hidden Posts (হাইড পোস্ট)
+                </a>
             </div>
             <div class="settings-card">
                 <h3>অ্যাক্টিভিটি ও রিওয়ার্ড</h3>
@@ -1163,18 +1345,84 @@
             <div class="settings-card">
                 <h3>অর্থায়ন</h3>
                 <a href="#" id="go-to-wallet" class="dropdown-item" style="border-bottom: 1px solid #eee; padding-left: 0; color: var(--text);"><i class="fas fa-wallet"></i> ওয়ালেট</a>
-                <a href="#" id="go-to-subscription" class="dropdown-item" style="padding-left: 0; color: var(--text);"><i class="fas fa-credit-card"></i> পেমেন্ট ও সাবস্ক্রিপশন</a>
+                <a href="#" id="go-to-subscription" class="dropdown-item" style="border-bottom: 1px solid #eee; padding-left: 0; color: var(--text);"><i class="fas fa-credit-card"></i> পেমেন্ট ও সাবস্ক্রিপশন (Add Money)</a>
+                <a href="#" id="go-to-withdraw" class="dropdown-item" style="padding-left: 0; color: var(--text);"><i class="fas fa-money-bill-wave"></i> টাকা উত্তোলন (Withdraw)</a>
             </div>
         </div>
     </div>
     
+    <!-- Hidden Posts Page -->
+    <div id="hidden-posts-page" class="d-none app-view">
+        <div class="container" style="padding-top: 20px;">
+            <div style="display:flex; align-items:center; margin-bottom:20px;">
+                <button onclick="history.back()" style="background:none; border:none; font-size:20px; margin-right:15px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+                <h2>হাইড করা পোস্টগুলো</h2>
+            </div>
+            <div id="hidden-posts-list">
+                <!-- List will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Page -->
+    <div id="withdraw-page" class="d-none app-view">
+        <div class="container" style="padding-top: 20px;">
+            <div style="display:flex; align-items:center; margin-bottom:20px;">
+                <button onclick="history.back()" style="background:none; border:none; font-size:20px; margin-right:15px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+                <h2>টাকা উত্তোলন</h2>
+            </div>
+            
+            <div class="wallet-card">
+                <p>উত্তোলনযোগ্য ব্যালেন্স</p>
+                <div class="balance-amount" id="withdraw-balance">$0.00</div>
+            </div>
+
+            <div class="settings-card">
+                <h3>উত্তোলনের বিবরণ</h3>
+                <form id="withdraw-form">
+                    <div class="form-group">
+                        <label>পেমেন্ট মেথড</label>
+                        <select id="withdraw-method" class="form-control" required>
+                            <option value="">সিলেক্ট করুন</option>
+                            <option value="wmt">WMT Wallet (0% Fee)</option>
+                            <option value="bkash">bKash</option>
+                            <option value="nagad">Nagad</option>
+                            <option value="rocket">Rocket</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>অ্যাকাউন্ট নম্বর / WMT ID</label>
+                        <input type="text" id="withdraw-account" class="form-control" placeholder="নাম্বার বা আইডি লিখুন" required>
+                    </div>
+                    <div class="form-group">
+                        <label>টাকার পরিমাণ ($)</label>
+                        <input type="number" step="0.01" id="withdraw-amount" class="form-control" placeholder="কত টাকা তুলতে চান?" required>
+                        <div class="fee-info" id="withdraw-fee-info"></div>
+                        <div class="net-amount-display" id="withdraw-net-display"></div>
+                    </div>
+                    <button type="submit" class="btn" id="withdraw-btn">
+                        <span class="btn-text">সাবমিট রিকুয়েষ্ট</span>
+                        <span class="btn-spinner"></span>
+                    </button>
+                </form>
+            </div>
+            
+             <div class="settings-card">
+                <h3>উত্তোলন ইতিহাস</h3>
+                <div id="withdraw-history-list">
+                    <p style="color:#777; text-align:center;">কোনো ইতিহাস নেই</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Leaderboard Page -->
     <div id="leaderboard-page" class="d-none app-view">
         <div class="container" style="padding: 0;">
             <div class="leaderboard-header">
                 <button id="back-from-leaderboard" style="float: left; background:none; border:none; color:white; font-size:18px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
                 <h2>লিডারবোর্ড (সাপ্তাহিক)</h2>
-                <p style="font-size:12px; opacity:0.8;">সেরা ৩ জন প্রতি সপ্তাহে পাবে $0.70!</p>
+                <p style="font-size:12px; opacity:0.8;" id="lb-reward-info">সেরা ৩ জন প্রতি সপ্তাহে পাবে আকর্ষণীয় রিওয়ার্ড!</p>
             </div>
             <div class="container">
                 <div id="leaderboard-list" class="leaderboard-list">
@@ -1198,24 +1446,91 @@
             <div class="wallet-card">
                 <p>বর্তমান ব্যালেন্স</p>
                 <div class="balance-amount" id="wallet-balance">$0.00</div>
-                <p style="font-size:12px; opacity:0.8;">রিওয়ার্ড থেকে আয়</p>
+                <p style="font-size:12px; opacity:0.8;">রিওয়ার্ড ও ডিপোজিট থেকে</p>
             </div>
             <div class="settings-card">
                 <h3>লেনদেনের ইতিহাস</h3>
                 <div id="transaction-list">
-                    <p style="color:#777; text-align:center;">কোনো লেনদেন পাওয়া যায়নি</p>
+                    <p style="color:#777; text-align:center;">লোড হচ্ছে...</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Add Money / Subscription Page -->
     <div id="subscription-page" class="d-none app-view">
-        <div class="container" style="padding: 20px 0; text-align: center;">
-            <h2>পেমেন্ট ও সাবস্ক্রিপশন পেজ শীঘ্রই আসছে...</h2>
+        <div class="container" style="padding: 20px 0;">
+            <h2 style="margin-bottom:20px;">পেমেন্ট ও সাবস্ক্রিপশন</h2>
+            <div class="settings-card">
+                <h3>Add Money</h3>
+                <p style="font-size:14px; color:#666; margin-bottom:10px;">আপনার ওয়ালেটে টাকা যোগ করতে নিচের মার্চেন্ট আইডিতে PWMT পেমেন্ট করুন।</p>
+                
+                <div class="wmt-id-box">
+                    <span id="wmt-id-text">PWMT4502</span>
+                    <button class="copy-btn" onclick="copyWmtId()">Copy</button>
+                </div>
+                
+                <div class="payment-method-box">
+                    <form id="add-money-form">
+                        <div class="form-group">
+                            <label>টাকার পরিমাণ ($)</label>
+                            <input type="number" step="0.01" id="deposit-amount" class="form-control" placeholder="যেমন: 10.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Transaction ID</label>
+                            <input type="text" id="deposit-trx-id" class="form-control" placeholder="লেনদেনের ট্রানজেকশন আইডি" required>
+                        </div>
+                        <button type="submit" class="btn" id="deposit-btn">
+                             <span class="btn-text">কনফার্ম করুন</span>
+                             <span class="btn-spinner"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="settings-card">
+                <h3>ডিপোজিট ইতিহাস</h3>
+                <div id="deposit-history-list">
+                    <p style="color:#777; text-align:center; padding:10px;">লোড হচ্ছে...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- MODALS -->
+    
+    <!-- CREATE POST MODAL -->
+    <div id="create-post-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="create-post-header">
+                 <h3 class="modal-title" style="margin:0; flex-grow:1; text-align:center;">পোস্ট তৈরি করুন</h3>
+                 <button style="background:none; border:none; font-size:20px; cursor:pointer;" onclick="closeModal('create-post-modal')"><i class="fas fa-times"></i></button>
+            </div>
+            <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+            
+            <div style="display:flex; align-items:center; margin-bottom:15px;">
+                <img src="" id="modal-user-pic" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
+                <span style="font-weight:600;" id="modal-user-name">User Name</span>
+            </div>
+            
+            <textarea id="modal-post-input" class="create-post-input-area" placeholder="আপনার মনে কি আছে?"></textarea>
+            
+            <div id="modal-image-preview" class="image-preview-area">
+                <img src="" id="preview-img-elem">
+            </div>
+            
+            <div class="modal-post-actions">
+                <input type="file" id="modal-file-input" accept="image/*" style="display:none;">
+                <div style="font-size:14px; font-weight:500;">আপনার পোস্টে যোগ করুন</div>
+                <div style="display:flex; gap:15px;">
+                    <i class="fas fa-image add-photo-btn" id="modal-add-photo" title="Photo"></i>
+                </div>
+            </div>
+            
+            <button class="btn" id="modal-submit-post" style="margin-top:15px;">পোস্ট করুন</button>
+        </div>
+    </div>
+
     <div id="name-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 class="modal-title">নাম পরিবর্তন</h3>
@@ -1292,13 +1607,18 @@
         let activeChatUnsubscribe = null;
         let sessionTimer = null; // For tracking browse time
         
-        // --- NEW: DYNAMIC POINTS SYSTEM ---
-        // Default values (will be overwritten by Admin Panel settings)
+        // Dynamic Points System
         let activityPoints = {
             post: 10,
             like: 2,
             comment: 5,
             browse: 1
+        };
+        
+        // Withdrawal Fees Defaults
+        let withdrawFees = {
+            wmt: 0,
+            others: 2.5
         };
 
         const DEFAULT_PROFILE_PIC = 'https://res.cloudinary.com/dzmo138qb/image/upload/v1763471321/images_19_iteqms.jpg';
@@ -1320,6 +1640,18 @@
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
+        }
+
+        // Toggle Button Loading State
+        function setBtnLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            if(isLoading) {
+                btn.classList.add('btn-loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('btn-loading');
+                btn.disabled = false;
+            }
         }
 
         function formatPostTime(timestamp) {
@@ -1344,8 +1676,6 @@
             }
         }
 
-        // --- NEW: VERIFICATION BADGE HELPER ---
-        // This function is now used EVERYWHERE a name is displayed
         function getVerificationHtml(isVerified, badgeExpiry) {
             if (!isVerified) return '';
             if (badgeExpiry && badgeExpiry.seconds * 1000 < Date.now()) {
@@ -1353,9 +1683,8 @@
             }
             return '<i class="fas fa-check-circle verified-badge" title="Verified"></i>';
         }
-        // --------------------------------------
         
-        // --- NEW: LOAD ADMIN SETTINGS ---
+        // Load Admin Settings (Points, Rewards, Fees)
         async function loadSystemSettings() {
             try {
                 const doc = await db.collection('system').doc('settings').get();
@@ -1365,10 +1694,10 @@
                     if(data.points_like) activityPoints.like = data.points_like;
                     if(data.points_comment) activityPoints.comment = data.points_comment;
                     if(data.points_browse) activityPoints.browse = data.points_browse;
-                    console.log("Admin points loaded:", activityPoints);
+                    if(data.withdraw_fee_mfs) withdrawFees.others = parseFloat(data.withdraw_fee_mfs);
                 }
             } catch(e) {
-                console.log("Using default points.");
+                console.log("Using default settings.");
             }
         }
 
@@ -1400,25 +1729,24 @@
 
         // --- AUTH & INIT ---
         auth.onAuthStateChanged(async user => {
+            // Hide Global Loader ONLY after checking auth state
+            
             if (user) {
-                // Load admin settings first
                 await loadSystemSettings();
-
                 const userDoc = await db.collection('users').doc(user.uid).get();
+                
                 if (userDoc.exists) {
                     const data = userDoc.data();
-
-                    // CHECK ACCOUNT DISABLED STATUS
                     if (data.isDisabled === true) {
                         await auth.signOut();
-                        alert("আপনার অ্যাকাউন্টটি অ্যাডমিন দ্বারা নিষ্ক্রিয় (Disabled) করা হয়েছে।");
+                        alert("আপনার অ্যাকাউন্টটি নিষ্ক্রিয় (Disabled) করা হয়েছে।");
+                        document.getElementById('global-loader').style.display = 'none';
                         return;
                     }
-
                     currentUserData = data;
                     updateHeaderProfile(currentUserData);
                     initNotificationListener(user.uid);
-                    startSessionTracking(user.uid); // Start tracking time
+                    startSessionTracking(user.uid); 
                     navigateTo('home-page');
                     loadNewsfeedPosts(); 
                 } else {
@@ -1429,11 +1757,17 @@
                 stopSessionTracking();
                 navigateTo('login-page', false);
             }
+            
+            // Remove the flicker loader
+            setTimeout(() => {
+                document.getElementById('global-loader').style.display = 'none';
+            }, 500);
         });
 
         function updateHeaderProfile(data) {
             const picUrl = data.profilePicURL || DEFAULT_PROFILE_PIC;
             document.getElementById('header-profile-pic').src = picUrl;
+            document.getElementById('trigger-user-pic').src = picUrl;
         }
 
         // --- NOTIFICATION SYSTEM ---
@@ -1445,33 +1779,26 @@
                     const notifContainer = document.getElementById('notification-dropdown');
                     const badge = document.getElementById('notif-badge');
                     let unreadCount = 0;
-                    
                     notifContainer.innerHTML = '';
                     if(snapshot.empty) {
                         notifContainer.innerHTML = '<div style="padding:10px; text-align:center; color:#777;">কোনো নতুন নোটিফিকেশন নেই</div>';
                     }
-
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         if (!data.read) unreadCount++;
+                        // FIX 1: Handle undefined senderName (System Notifications)
+                        const senderName = data.senderName || 'System';
+                        const senderPic = data.senderPic || (data.senderName ? DEFAULT_PROFILE_PIC : 'https://cdn-icons-png.flaticon.com/512/3523/3523063.png');
+                        
                         const item = document.createElement('div');
                         item.className = `notification-item ${!data.read ? 'unread' : ''}`;
-                        
-                        // UPDATED: Badge in notifications
-                        // Assuming sender might have verification, we fetch or store it. 
-                        // Note: For best performance, senderIsVerified should be stored in notification doc.
-                        // Falling back to name only if not available, or add if you update sendNotification logic.
-                        
                         item.innerHTML = `
-                            <img src="${data.senderPic || DEFAULT_PROFILE_PIC}" class="notif-pic">
-                            <div>
-                                <strong>${data.senderName}</strong> ${getNotifText(data.type)}
-                            </div>
+                            <img src="${senderPic}" class="notif-pic">
+                            <div><strong>${senderName}</strong> ${getNotifText(data.type)}</div>
                         `;
                         item.onclick = () => handleNotificationClick(doc.id, data);
                         notifContainer.appendChild(item);
                     });
-
                     if (unreadCount > 0) {
                         badge.textContent = unreadCount;
                         badge.classList.add('show');
@@ -1486,6 +1813,10 @@
             if (type === 'comment') return 'আপনার পোস্টে কমেন্ট করেছেন।';
             if (type === 'follow') return 'আপনাকে ফলো করছেন।';
             if (type === 'reward') return 'লিডারবোর্ড রিওয়ার্ড!';
+            if (type === 'deposit') return 'আপনার ডিপোজিট কনফার্ম হয়েছে!';
+            if (type === 'deposit_reject') return 'আপনার ডিপোজিট বাতিল হয়েছে।';
+            if (type === 'withdraw_approve') return 'টাকা উত্তোলন সম্পন্ন হয়েছে।';
+            if (type === 'withdraw_reject') return 'টাকা উত্তোলন বাতিল হয়েছে।';
             return 'আপনাকে একটি নোটিফিকেশন পাঠিয়েছেন।';
         }
 
@@ -1493,6 +1824,13 @@
             await db.collection('users').doc(auth.currentUser.uid).collection('notifications').doc(docId).update({read: true});
             if (data.postId) navigateTo('home-page'); 
             else if (data.senderUid) loadUserProfile(data.senderUid);
+            else if (data.type === 'deposit' || data.type === 'deposit_reject') {
+                navigateTo('subscription-page');
+                loadDepositHistory();
+            } else if (data.type.includes('withdraw')) {
+                navigateTo('withdraw-page');
+                loadWithdrawHistory();
+            }
         }
 
         async function sendNotification(targetUid, type, postId = null) {
@@ -1509,7 +1847,7 @@
         }
 
         // --- NEWSFEED & POSTS ---
-        function renderPost(doc) {
+        function renderPost(doc, isHidden = false) {
             const postData = doc.data();
             const postId = doc.id;
             const postElement = document.createElement('div');
@@ -1519,25 +1857,49 @@
             const userLiked = postData.likes && postData.likes.includes(auth.currentUser.uid);
             const likedClass = userLiked ? 'liked' : '';
             const heartIconClass = userLiked ? 'fas' : 'far';
-            
             const time = formatPostTime(postData.createdAt);
-
-            // --- UPDATED: INCLUDE BADGE HTML ---
             const badgeHtml = getVerificationHtml(postData.isVerified, postData.badgeExpiry);
-            // ----------------------------------
+            
+            let statusBadge = '';
+            if(postData.status === 'approved') {
+                statusBadge = '<span class="rec-badge"><i class="fas fa-star"></i> Recommended</span>';
+            } else if (postData.status === 'pending' && postData.authorUid === auth.currentUser.uid) {
+                statusBadge = '<span class="pending-badge">Pending</span>';
+            }
+            
+            // Post Menu Options
+            const isOwner = postData.authorUid === auth.currentUser.uid;
+            
+            // Different menu for hidden posts view
+            let menuHtml = '';
+            if (isHidden) {
+                menuHtml = `<div class="post-menu-dropdown">
+                                <div class="post-menu-item unhide-post-opt"><i class="fas fa-eye"></i> আন-হাইড করুন</div>
+                            </div>`;
+            } else {
+                menuHtml = `<div class="post-menu-dropdown">
+                                ${isOwner ? `<div class="post-menu-item edit-post-opt"><i class="fas fa-edit"></i> এডিট করুন</div>` : ''}
+                                ${isOwner ? `<div class="post-menu-item delete-post-opt" style="color:var(--error);"><i class="fas fa-trash"></i> ডিলিট করুন</div>` : ''}
+                                <div class="post-menu-item hide-post-opt"><i class="fas fa-eye-slash"></i> হাইড করুন</div>
+                                <div class="post-menu-item report-post-opt"><i class="fas fa-flag"></i> রিপোর্ট করুন</div>
+                            </div>`;
+            }
 
             postElement.innerHTML = `
                 <div class="post-header">
                     <img src="${postData.authorProfilePic || DEFAULT_PROFILE_PIC}" class="post-user-pic" onclick="loadUserProfile('${postData.authorUid}')">
                     <div class="post-user-info">
                         <h3 onclick="loadUserProfile('${postData.authorUid}')">${postData.authorName} ${badgeHtml}</h3>
-                        <p>${time}</p>
+                        <p>${time} ${statusBadge}</p>
                     </div>
+                    <button class="post-menu-btn"><i class="fas fa-ellipsis-v"></i></button>
+                    ${menuHtml}
                 </div>
                 <div class="post-content">
                     <p>${postData.text}</p>
                     ${postData.imageUrl ? `<img src="${postData.imageUrl}" class="post-image">` : ''}
                 </div>
+                ${!isHidden ? `
                 <div class="post-engagement">
                     <button class="engagement-btn like-btn">
                         <i class="${heartIconClass} fa-heart ${likedClass}"></i> 
@@ -1547,7 +1909,7 @@
                         <i class="far fa-comment"></i> <span class="comment-count">${formatCount(postData.commentsCount || 0)}</span>
                     </button>
                     <button class="engagement-btn share-btn">
-                        <i class="far fa-share-square"></i> শেয়ার
+                        <i class="far fa-share-square"></i> Share
                     </button>
                 </div>
                 <div class="comment-section">
@@ -1556,51 +1918,62 @@
                         <input type="text" class="comment-input" placeholder="কমেন্ট করুন..." required>
                         <button type="submit" class="comment-submit-btn"><i class="fas fa-paper-plane"></i></button>
                     </form>
-                </div>`;
+                </div>` : ''}`;
             return postElement;
         }
 
-        document.getElementById('create-post-btn').addEventListener('click', async () => {
-            const textInput = document.getElementById('post-text-input');
-            const fileInput = document.getElementById('post-image-input');
-            const btn = document.getElementById('create-post-btn');
-            
-            if(!textInput.value.trim() && !fileInput.files[0]) return;
+        // Create Post Logic
+        document.getElementById('create-post-trigger').addEventListener('click', () => {
+            document.getElementById('modal-post-input').value = '';
+            document.getElementById('modal-file-input').value = '';
+            document.getElementById('modal-image-preview').style.display = 'none';
+            document.getElementById('modal-user-pic').src = currentUserData.profilePicURL || DEFAULT_PROFILE_PIC;
+            document.getElementById('modal-user-name').textContent = currentUserData.fullName;
+            openModal('create-post-modal');
+            setTimeout(() => document.getElementById('modal-post-input').focus(), 100);
+        });
+        
+        document.getElementById('modal-add-photo').addEventListener('click', () => document.getElementById('modal-file-input').click());
+        
+        document.getElementById('modal-file-input').addEventListener('change', function(e) {
+            if(this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img-elem').src = e.target.result;
+                    document.getElementById('modal-image-preview').style.display = 'block';
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
 
+        document.getElementById('modal-submit-post').addEventListener('click', async () => {
+            const textInput = document.getElementById('modal-post-input');
+            const fileInput = document.getElementById('modal-file-input');
+            const btn = document.getElementById('modal-submit-post');
+            if(!textInput.value.trim() && !fileInput.files[0]) return;
+            
             btn.disabled = true;
             btn.textContent = 'পোস্ট হচ্ছে...';
-
             try {
                 let imgUrl = '';
                 if(fileInput.files[0]) imgUrl = await uploadToCloudinary(fileInput.files[0]);
-
                 await db.collection('posts').add({
                     text: textInput.value,
                     imageUrl: imgUrl,
                     authorUid: auth.currentUser.uid,
                     authorName: currentUserData.fullName,
                     authorProfilePic: currentUserData.profilePicURL,
-                    
-                    // --- UPDATED: ADD BADGE DATA ---
                     isVerified: currentUserData.isVerified || false,
                     badgeExpiry: currentUserData.badgeExpiry || null,
-                    // -----------------------------
-
+                    status: 'pending', 
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    likes: [],
-                    commentsCount: 0,
-                    shareCount: 0
+                    likes: [], commentsCount: 0, shareCount: 0
                 });
-                
-                // Update Activity Score (Dynamic Points)
                 updateActivityScore(auth.currentUser.uid, activityPoints.post, 'post');
-
-                textInput.value = '';
-                fileInput.value = '';
-                showToast('পোস্ট সফল হয়েছে!');
-                loadNewsfeedPosts();
+                closeModal('create-post-modal');
+                showToast('পোস্ট জমা দেওয়া হয়েছে! এডমিন অনুমোদনের পর দেখা যাবে।');
+                if(!document.getElementById('profile-page').classList.contains('d-none')) loadUserPosts(auth.currentUser.uid);
             } catch(e) {
-                console.error(e);
                 showToast('পোস্ট করতে সমস্যা হয়েছে');
             } finally {
                 btn.disabled = false;
@@ -1608,122 +1981,73 @@
             }
         });
 
-        // --- ACTIVITY TRACKING & LEADERBOARD LOGIC ---
-        
-        // 1. Track Session Time (Dynamic Points)
+        // --- LEADERBOARD & WALLET ---
         function startSessionTracking(uid) {
             if (sessionTimer) clearInterval(sessionTimer);
-            sessionTimer = setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    // Use dynamic browse points
-                    updateActivityScore(uid, activityPoints.browse, 'browse');
-                }
-            }, 60000); // Every 60 seconds
+            sessionTimer = setInterval(() => { if (document.visibilityState === 'visible') updateActivityScore(uid, activityPoints.browse, 'browse'); }, 60000);
         }
+        function stopSessionTracking() { if (sessionTimer) clearInterval(sessionTimer); }
 
-        function stopSessionTracking() {
-            if (sessionTimer) clearInterval(sessionTimer);
-        }
-
-        // 2. Universal Score Updater
         async function updateActivityScore(uid, points, type) {
-            // Fallback if points somehow undefined
             const scorePoints = points || 1;
-
-            const userRef = db.collection('users').doc(uid);
             const leaderboardRef = db.collection('leaderboard').doc(uid);
-            
             try {
-                const userDoc = await userRef.get();
-                const userData = userDoc.exists ? userDoc.data() : (currentUserData || {});
-                
-                // Use Transaction for safer updates
                 await db.runTransaction(async (t) => {
                     const lbDoc = await t.get(leaderboardRef);
-                    
                     let newData = {
                         uid: uid,
-                        name: userData.fullName || "User",
-                        pic: userData.profilePicURL || DEFAULT_PROFILE_PIC,
-                        // Update badge data in leaderboard too for display
-                        isVerified: userData.isVerified || false,
-                        badgeExpiry: userData.badgeExpiry || null,
+                        name: currentUserData.fullName || "User",
+                        pic: currentUserData.profilePicURL || DEFAULT_PROFILE_PIC,
+                        isVerified: currentUserData.isVerified || false,
+                        badgeExpiry: currentUserData.badgeExpiry || null,
                         lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
                         score: firebase.firestore.FieldValue.increment(scorePoints)
                     };
-
                     if(type === 'post') newData.postsCount = firebase.firestore.FieldValue.increment(1);
                     if(type === 'comment') newData.commentsCount = firebase.firestore.FieldValue.increment(1);
                     if(type === 'like') newData.likesCount = firebase.firestore.FieldValue.increment(1);
                     if(type === 'browse') newData.browseMinutes = firebase.firestore.FieldValue.increment(1);
-
+                    
                     if (!lbDoc.exists) {
                         t.set(leaderboardRef, { 
-                            ...newData, 
-                            score: scorePoints, // Initial score
-                            postsCount: type === 'post' ? 1 : 0,
-                            commentsCount: type === 'comment' ? 1 : 0,
-                            likesCount: type === 'like' ? 1 : 0,
-                            browseMinutes: type === 'browse' ? 1 : 0
+                            ...newData, score: scorePoints, postsCount: type==='post'?1:0, commentsCount: type==='comment'?1:0, likesCount: type==='like'?1:0, browseMinutes: type==='browse'?1:0 
                         });
-                    } else {
-                        t.update(leaderboardRef, newData);
-                    }
+                    } else { t.update(leaderboardRef, newData); }
                 });
-            } catch (e) {
-                console.log("Activity tracking error:", e);
-            }
+            } catch (e) { console.log(e); }
         }
 
-        // 3. Load Leaderboard
         async function loadLeaderboard() {
             const listContainer = document.getElementById('leaderboard-list');
             listContainer.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
-            
-            // Check for Weekly Reward Reset
             await checkAndDistributeRewards();
-
             try {
-                const snapshot = await db.collection('leaderboard')
-                                       .orderBy('score', 'desc')
-                                       .limit(10)
-                                       .get();
-                
+                const snapshot = await db.collection('leaderboard').orderBy('score', 'desc').limit(10).get();
                 listContainer.innerHTML = '';
                 let rank = 1;
                 let myRankData = null;
                 
-                if (snapshot.empty) {
-                    listContainer.innerHTML = '<div style="text-align:center; padding:20px;">এখনও কেউ অ্যাক্টিভিটি শুরু করেনি!</div>';
-                }
+                if (snapshot.empty) listContainer.innerHTML = '<div style="text-align:center; padding:20px;">এখনও কেউ অ্যাক্টিভিটি শুরু করেনি!</div>';
 
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const isMe = data.uid === auth.currentUser.uid;
                     if(isMe) myRankData = { rank: rank, score: data.score };
-
-                    let rankClass = '';
-                    let icon = '';
+                    let rankClass = '', icon = '';
                     if(rank === 1) { rankClass = 'rank-1'; icon = '<i class="fas fa-crown"></i>'; }
                     else if(rank === 2) { rankClass = 'rank-2'; icon = '<i class="fas fa-medal"></i>'; }
                     else if(rank === 3) { rankClass = 'rank-3'; icon = '<i class="fas fa-medal"></i>'; }
-
-                    // --- UPDATED: BADGE IN LEADERBOARD ---
                     const badgeHtml = getVerificationHtml(data.isVerified, data.badgeExpiry);
-
                     const item = document.createElement('div');
                     item.className = 'leaderboard-item';
                     if(isMe) item.style.backgroundColor = '#e3f2fd';
-                    
                     item.innerHTML = `
                         <div class="rank-num ${rankClass}">${icon || rank}</div>
                         <div class="lb-user-info" onclick="loadUserProfile('${data.uid}')" style="cursor:pointer;">
                             <img src="${data.pic || DEFAULT_PROFILE_PIC}" class="lb-pic">
                             <div>
-                                <div style="font-weight:600; font-size:15px;">
-                                    ${data.name} ${badgeHtml}
-                                </div>
-                                <div class="lb-stats-mini">Posts: ${data.postsCount || 0} • Likes: ${data.likesCount || 0} • Min: ${data.browseMinutes || 0}</div>
+                                <div style="font-weight:600; font-size:15px;">${data.name} ${badgeHtml}</div>
+                                <div class="lb-stats-mini">Posts: ${data.postsCount||0} • Likes: ${data.likesCount||0} • Min: ${data.browseMinutes||0}</div>
                             </div>
                         </div>
                         <div class="lb-score">${data.score} pts</div>
@@ -1731,7 +2055,6 @@
                     listContainer.appendChild(item);
                     rank++;
                 });
-
                 if(!myRankData) {
                     const myDoc = await db.collection('leaderboard').doc(auth.currentUser.uid).get();
                     if(myDoc.exists) {
@@ -1745,130 +2068,372 @@
                     document.getElementById('my-score-display').textContent = `স্কোর: ${myRankData.score}`;
                     document.getElementById('my-rank-display').textContent = `#${myRankData.rank}`;
                 }
-
-            } catch (e) {
-                console.error(e);
-                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:red;">লোড করতে সমস্যা হয়েছে।</div>';
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // 4. Weekly Reward Logic
         async function checkAndDistributeRewards() {
             const metaRef = db.collection('system').doc('leaderboard_meta');
             const metaDoc = await metaRef.get();
             const now = Date.now();
             const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-            const REWARD_AMOUNT = 0.70;
+            
+            // DYNAMIC REWARD AMOUNT from Admin Settings
+            let rewardAmount = 0.70; // Default
+            const settingsDoc = await db.collection('system').doc('settings').get();
+            if(settingsDoc.exists && settingsDoc.data().reward_amount) {
+                rewardAmount = parseFloat(settingsDoc.data().reward_amount);
+            }
+            document.getElementById('lb-reward-info').innerText = `সেরা ৩ জন প্রতি সপ্তাহে পাবে $${rewardAmount}!`;
 
             let nextReset = now; 
-            
-            if (metaDoc.exists) {
-                nextReset = metaDoc.data().nextReset.toMillis();
-            } else {
+            if (metaDoc.exists) nextReset = metaDoc.data().nextReset.toMillis();
+            else {
                 await metaRef.set({ nextReset: firebase.firestore.Timestamp.fromMillis(now + ONE_WEEK_MS) });
                 return;
             }
 
             if (now > nextReset) {
-                console.log("Running Weekly Reward Distribution...");
                 const top3 = await db.collection('leaderboard').orderBy('score', 'desc').limit(3).get();
-                
                 if(!top3.empty) {
                     const batch = db.batch();
                     top3.forEach(doc => {
                         const uid = doc.data().uid;
-                        const userRef = db.collection('users').doc(uid);
-                        batch.update(userRef, { 
-                            walletBalance: firebase.firestore.FieldValue.increment(REWARD_AMOUNT) 
-                        });
-                        const notifRef = db.collection('users').doc(uid).collection('notifications').doc();
-                        batch.set(notifRef, {
-                            type: 'reward',
-                            text: 'অভিনন্দন! আপনি সাপ্তাহিক লিডারবোর্ডে সেরা হয়ে $0.70 জিতেছেন!',
-                            read: false,
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        batch.update(db.collection('users').doc(uid), { walletBalance: firebase.firestore.FieldValue.increment(rewardAmount) });
+                        batch.set(db.collection('users').doc(uid).collection('notifications').doc(), {
+                            type: 'reward', text: `অভিনন্দন! আপনি সাপ্তাহিক লিডারবোর্ডে সেরা হয়ে $${rewardAmount} জিতেছেন!`, read: false, createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     });
-
+                    // Reset everyone
                     const activeUsers = await db.collection('leaderboard').limit(50).get();
-                    activeUsers.forEach(doc => {
-                        batch.update(doc.ref, { 
-                            score: 0, postsCount: 0, likesCount: 0, commentsCount: 0, browseMinutes: 0 
-                        });
-                    });
-
+                    activeUsers.forEach(doc => { batch.update(doc.ref, { score: 0, postsCount: 0, likesCount: 0, commentsCount: 0, browseMinutes: 0 }); });
                     batch.update(metaRef, { nextReset: firebase.firestore.Timestamp.fromMillis(now + ONE_WEEK_MS) });
                     await batch.commit();
-                    showToast('নতুন সপ্তাহ শুরু হয়েছে! গত সপ্তাহের বিজয়ীদের পুরস্কৃত করা হয়েছে।');
+                    showToast('নতুন সপ্তাহ শুরু হয়েছে! বিজয়ীদের রিওয়ার্ড দেওয়া হয়েছে।');
                 }
             }
         }
         
-        // 5. Load Wallet Logic
         async function loadWallet() {
             const balanceEl = document.getElementById('wallet-balance');
             const transList = document.getElementById('transaction-list');
-            
             const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
             const balance = userDoc.data().walletBalance || 0.00;
             balanceEl.textContent = `$${balance.toFixed(2)}`;
+            
+            transList.innerHTML = '<p style="text-align:center;">লোড হচ্ছে...</p>';
+            
+            // FIX 2: Handle Index Errors and combine Deposit + Withdraw logs if needed
+            // Here we just show Deposit requests as per original, but robustly.
+            try {
+                const deposits = await db.collection('deposit_requests')
+                    .where('uid', '==', auth.currentUser.uid)
+                    .orderBy('createdAt', 'desc').limit(5).get();
+                
+                transList.innerHTML = '';
+                if(deposits.empty) {
+                     transList.innerHTML = '<p style="color:#777; text-align:center;">কোনো লেনদেন পাওয়া যায়নি</p>';
+                } else {
+                    deposits.forEach(doc => {
+                        const d = doc.data();
+                        const div = document.createElement('div');
+                        div.className = 'dropdown-item';
+                        div.style.justifyContent = 'space-between';
+                        div.style.cursor = 'default';
+                        let color = d.status === 'approved' ? 'green' : (d.status === 'rejected' ? 'red' : 'orange');
+                        div.innerHTML = `
+                            <div>
+                                <strong>Add Money</strong><br>
+                                <span style="font-size:12px; color:#777;">TRX: ${d.trxId}</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <strong>$${d.amount}</strong><br>
+                                <span style="font-size:12px; color:${color};">${d.status.toUpperCase()}</span>
+                            </div>
+                        `;
+                        transList.appendChild(div);
+                    });
+                }
+            } catch (error) {
+                console.error("Wallet History Error (Index Missing?):", error);
+                transList.innerHTML = '<p style="color:red; text-align:center; font-size:12px;">হিস্ট্রি লোড করতে সমস্যা। কনসোল চেক করুন (Index Error)</p>';
+            }
+        }
+        
+        // --- ADD MONEY LOGIC ---
+        function copyWmtId() {
+            const text = document.getElementById('wmt-id-text').innerText;
+            navigator.clipboard.writeText(text).then(() => showToast("WMT ID কপি হয়েছে!"));
+        }
+        window.copyWmtId = copyWmtId;
+
+        document.getElementById('deposit-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const trxId = document.getElementById('deposit-trx-id').value.trim();
+            
+            if(!amount || !trxId) return showToast("সব তথ্য পূরণ করুন");
+            
+            setBtnLoading('deposit-btn', true);
+            
+            try {
+                await db.collection('deposit_requests').add({
+                    uid: auth.currentUser.uid,
+                    userName: currentUserData.fullName,
+                    amount: amount,
+                    trxId: trxId,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast("রিকুয়েষ্ট পাঠানো হয়েছে! এডমিন চেক করে ব্যালেন্স যোগ করবেন।");
+                document.getElementById('add-money-form').reset();
+                loadDepositHistory();
+            } catch(e) {
+                showToast("সমস্যা হয়েছে: " + e.message);
+            } finally {
+                setBtnLoading('deposit-btn', false);
+            }
+        });
+
+        async function loadDepositHistory() {
+            const list = document.getElementById('deposit-history-list');
+            list.innerHTML = '<p style="text-align:center;">লোড হচ্ছে...</p>';
+            
+            try {
+                const snap = await db.collection('deposit_requests')
+                    .where('uid', '==', auth.currentUser.uid)
+                    .orderBy('createdAt', 'desc').limit(10).get();
+                    
+                list.innerHTML = '';
+                if(snap.empty) {
+                    list.innerHTML = '<p style="color:#777; text-align:center; padding:10px;">কোনো ডিপোজিট হিস্ট্রি নেই</p>';
+                } else {
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const div = document.createElement('div');
+                        div.style.padding = "10px";
+                        div.style.borderBottom = "1px solid #eee";
+                        div.style.display = "flex";
+                        div.style.justifyContent = "space-between";
+                        
+                        let statusClass = d.status === 'approved' ? 'status-approved' : (d.status === 'rejected' ? 'status-rejected' : 'status-pending');
+                        
+                        div.innerHTML = `
+                            <div>
+                                <div style="font-weight:600;">$${d.amount} Deposit</div>
+                                <div style="font-size:12px; color:#888;">TRX: ${d.trxId}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="${statusClass}">${d.status.toUpperCase()}</div>
+                                <div style="font-size:10px; color:#888;">${formatPostTime(d.createdAt)}</div>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                }
+            } catch (error) {
+                console.error("Deposit History Error (Index Missing?):", error);
+                list.innerHTML = '<p style="color:red; text-align:center; font-size:12px;">ডাটাবেস ইনডেক্স তৈরি করা প্রয়োজন (Console Check)</p>';
+            }
+        }
+
+        // --- WITHDRAW LOGIC (New Feature 4) ---
+        
+        // Calculate Fee on Input Change
+        const withdrawAmountInput = document.getElementById('withdraw-amount');
+        const withdrawMethodInput = document.getElementById('withdraw-method');
+        
+        function calculateWithdrawFee() {
+            const amount = parseFloat(withdrawAmountInput.value);
+            const method = withdrawMethodInput.value;
+            const displayFee = document.getElementById('withdraw-fee-info');
+            const displayNet = document.getElementById('withdraw-net-display');
+            
+            if (!amount || !method) {
+                displayFee.textContent = '';
+                displayNet.textContent = '';
+                return;
+            }
+            
+            let feePercent = 0;
+            if (method === 'wmt') feePercent = withdrawFees.wmt; // 0%
+            else feePercent = withdrawFees.others; // 2.5% (Configurable)
+            
+            const feeAmount = (amount * feePercent) / 100;
+            const netAmount = amount - feeAmount;
+            
+            displayFee.textContent = `ফি: $${feeAmount.toFixed(2)} (${feePercent}%)`;
+            displayNet.textContent = `পাবেন: $${netAmount.toFixed(2)}`;
+        }
+        
+        withdrawAmountInput.addEventListener('input', calculateWithdrawFee);
+        withdrawMethodInput.addEventListener('change', calculateWithdrawFee);
+
+        document.getElementById('withdraw-btn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(withdrawAmountInput.value);
+            const method = withdrawMethodInput.value;
+            const account = document.getElementById('withdraw-account').value.trim();
+            
+            if(!amount || !method || !account) return showToast("সব তথ্য পূরণ করুন");
+            
+            const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+            const currentBal = userDoc.data().walletBalance || 0;
+            
+            if(amount > currentBal) return showToast("অপর্যাপ্ত ব্যালেন্স!");
+            if(amount < 1) return showToast("মিনিমাম $1 উত্তোলন করতে হবে"); // Minimum limit logic
+            
+            setBtnLoading('withdraw-btn', true);
+            
+            try {
+                let feePercent = (method === 'wmt') ? withdrawFees.wmt : withdrawFees.others;
+                const feeAmount = (amount * feePercent) / 100;
+                const netAmount = amount - feeAmount;
+
+                await db.runTransaction(async (t) => {
+                    const userRef = db.collection('users').doc(auth.currentUser.uid);
+                    const uDoc = await t.get(userRef);
+                    if(uDoc.data().walletBalance < amount) throw "Insufficient Balance";
+                    
+                    // Deduct Balance Immediately
+                    t.update(userRef, { walletBalance: firebase.firestore.FieldValue.increment(-amount) });
+                    
+                    // Create Request
+                    const reqRef = db.collection('withdraw_requests').doc();
+                    t.set(reqRef, {
+                        uid: auth.currentUser.uid,
+                        userName: currentUserData.fullName,
+                        amount: amount,
+                        fee: feeAmount,
+                        netAmount: netAmount,
+                        method: method,
+                        account: account,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                showToast("উত্তোলন রিকুয়েষ্ট সফল হয়েছে!");
+                document.getElementById('withdraw-form').reset();
+                document.getElementById('withdraw-fee-info').textContent = '';
+                document.getElementById('withdraw-net-display').textContent = '';
+                loadWithdrawHistory();
+                // Update displayed balance
+                document.getElementById('withdraw-balance').textContent = `$${(currentBal - amount).toFixed(2)}`;
+
+            } catch(e) {
+                showToast("সমস্যা হয়েছে: " + e);
+            } finally {
+                setBtnLoading('withdraw-btn', false);
+            }
+        });
+
+        async function loadWithdrawHistory() {
+            const list = document.getElementById('withdraw-history-list');
+            list.innerHTML = '<p style="text-align:center;">লোড হচ্ছে...</p>';
+            
+            try {
+                const snap = await db.collection('withdraw_requests')
+                    .where('uid', '==', auth.currentUser.uid)
+                    .orderBy('createdAt', 'desc').limit(10).get();
+                
+                list.innerHTML = '';
+                if(snap.empty) {
+                    list.innerHTML = '<p style="color:#777; text-align:center; padding:10px;">কোনো ইতিহাস নেই</p>';
+                } else {
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        const div = document.createElement('div');
+                        div.style.padding = "10px";
+                        div.style.borderBottom = "1px solid #eee";
+                        div.style.display = "flex";
+                        div.style.justifyContent = "space-between";
+                        
+                        let statusClass = d.status === 'approved' ? 'status-approved' : (d.status === 'rejected' ? 'status-rejected' : 'status-pending');
+                        
+                        div.innerHTML = `
+                            <div>
+                                <div style="font-weight:600;">$${d.amount} Withdraw</div>
+                                <div style="font-size:12px; color:#888;">${d.method.toUpperCase()} - ${d.account}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="${statusClass}">${d.status.toUpperCase()}</div>
+                                <div style="font-size:10px; color:#888;">${formatPostTime(d.createdAt)}</div>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
+                }
+                // Update Balance Display on Page Load
+                const u = await db.collection('users').doc(auth.currentUser.uid).get();
+                document.getElementById('withdraw-balance').textContent = `$${(u.data().walletBalance || 0).toFixed(2)}`;
+
+            } catch (error) {
+                console.error("Withdraw History Error (Index Missing?):", error);
+                list.innerHTML = '<p style="color:red; text-align:center; font-size:12px;">ডাটাবেস ইনডেক্স তৈরি করা প্রয়োজন (Console Check)</p>';
+            }
+        }
+
+        // --- HIDDEN POSTS LOGIC (New Feature 3) ---
+        async function loadHiddenPosts() {
+            const container = document.getElementById('hidden-posts-list');
+            container.innerHTML = '<p style="text-align:center;">লোড হচ্ছে...</p>';
+            
+            // Fetch hidden post IDs from subcollection
+            const hiddenSnap = await db.collection('users').doc(auth.currentUser.uid).collection('hidden_posts').orderBy('hiddenAt', 'desc').get();
+            
+            container.innerHTML = '';
+            if(hiddenSnap.empty) {
+                container.innerHTML = '<p style="text-align:center; color:#777; margin-top:20px;">কোনো হাইড করা পোস্ট নেই।</p>';
+                return;
+            }
+            
+            for (let doc of hiddenSnap.docs) {
+                // Check if post still exists in main collection
+                try {
+                    const postDoc = await db.collection('posts').doc(doc.id).get();
+                    if(postDoc.exists) {
+                        const postEl = renderPost(postDoc, true); // True for hidden view
+                        container.appendChild(postEl);
+                    }
+                } catch(e) { console.log("Error loading hidden post", e); }
+            }
         }
 
         // --- PROFILE LOGIC ---
         async function loadUserProfile(targetUid) {
             navigateTo('profile-page');
             const isSelf = targetUid === auth.currentUser.uid;
-            
-            // Reset UI
             document.getElementById('profile-name').innerHTML = 'Loading...';
             document.getElementById('profile-bio').textContent = '';
             document.getElementById('profile-pic-large').src = DEFAULT_PROFILE_PIC;
             document.getElementById('profile-cover-photo').style.backgroundImage = 'none';
-            document.getElementById('profile-cover-photo').classList.remove('editable');
-
-            // Controls
             document.getElementById('edit-bio-trigger').style.display = isSelf ? 'inline-block' : 'none';
             document.getElementById('follow-btn').style.display = isSelf ? 'none' : 'inline-block';
             document.getElementById('msg-btn').style.display = isSelf ? 'none' : 'inline-block';
 
-            document.getElementById('profile-pic-large').style.pointerEvents = isSelf ? 'auto' : 'none';
-
             try {
                 let data;
-                if (isSelf && currentUserData.uid) {
-                    data = currentUserData;
-                } else {
+                if (isSelf && currentUserData.uid) data = currentUserData;
+                else {
                     const doc = await db.collection('users').doc(targetUid).get();
                     if (!doc.exists) return showToast('User not found');
                     data = doc.data();
                 }
-
-                // --- UPDATED: BADGE IN PROFILE NAME ---
                 const badgeHtml = getVerificationHtml(data.isVerified, data.badgeExpiry);
                 document.getElementById('profile-name').innerHTML = `${data.fullName} ${badgeHtml}`;
-                
                 document.getElementById('profile-bio').textContent = data.bio || 'কোনো বায়ো নেই';
                 document.getElementById('profile-pic-large').src = data.profilePicURL || DEFAULT_PROFILE_PIC;
                 document.getElementById('profile-cover-photo').style.backgroundImage = data.coverPhotoURL ? `url(${data.coverPhotoURL})` : 'none';
-                
                 document.getElementById('following-count').textContent = formatCount(data.followingCount || 0);
                 document.getElementById('follower-count').textContent = formatCount(data.followerCount || 0);
                 document.getElementById('like-count').textContent = formatCount(data.totalLikes || 0);
-
                 loadUserPosts(targetUid);
 
                 if (!isSelf) {
                     const followBtn = document.getElementById('follow-btn');
                     const myFollowings = await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).get();
-                    
-                    if (myFollowings.exists) {
-                        followBtn.textContent = 'Unfollow';
-                        followBtn.classList.add('btn-outline');
-                    } else {
-                        followBtn.textContent = 'Follow';
-                        followBtn.classList.remove('btn-outline');
-                    }
-
+                    if (myFollowings.exists) { followBtn.textContent = 'Unfollow'; followBtn.classList.add('btn-outline'); } 
+                    else { followBtn.textContent = 'Follow'; followBtn.classList.remove('btn-outline'); }
                     followBtn.onclick = async () => {
                         if (followBtn.textContent === 'Follow') {
                             await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).set({});
@@ -1876,190 +2441,119 @@
                             await db.collection('users').doc(targetUid).collection('followers').doc(auth.currentUser.uid).set({});
                             await db.collection('users').doc(targetUid).update({followerCount: firebase.firestore.FieldValue.increment(1)});
                             sendNotification(targetUid, 'follow');
-                            followBtn.textContent = 'Unfollow';
-                            followBtn.classList.add('btn-outline');
+                            followBtn.textContent = 'Unfollow'; followBtn.classList.add('btn-outline');
                         } else {
                             await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).delete();
                             await db.collection('users').doc(auth.currentUser.uid).update({followingCount: firebase.firestore.FieldValue.increment(-1)});
                             await db.collection('users').doc(targetUid).collection('followers').doc(auth.currentUser.uid).delete();
                             await db.collection('users').doc(targetUid).update({followerCount: firebase.firestore.FieldValue.increment(-1)});
-                            followBtn.textContent = 'Follow';
-                            followBtn.classList.remove('btn-outline');
+                            followBtn.textContent = 'Follow'; followBtn.classList.remove('btn-outline');
                         }
                         const updatedDoc = await db.collection('users').doc(targetUid).get();
                         document.getElementById('follower-count').textContent = formatCount(updatedDoc.data().followerCount || 0);
                     };
-
-                    // Pass verification status to chat
-                    document.getElementById('msg-btn').onclick = () => {
-                        openChat(targetUid, data.fullName, data.profilePicURL, data.isVerified, data.badgeExpiry);
-                    };
+                    document.getElementById('msg-btn').onclick = () => openChat(targetUid, data.fullName, data.profilePicURL, data.isVerified, data.badgeExpiry);
                 } else {
-                    // SELF INTERACTIONS
-                    document.getElementById('edit-bio-trigger').onclick = () => {
-                        document.getElementById('new-bio-input').value = data.bio || '';
-                        openModal('bio-modal');
-                    };
-
-                    const picInput = document.getElementById('profile-pic-input');
-                    document.getElementById('profile-pic-large').onclick = () => picInput.click();
-                    
-                    picInput.onchange = async (e) => {
+                    document.getElementById('edit-bio-trigger').onclick = () => { document.getElementById('new-bio-input').value = data.bio || ''; openModal('bio-modal'); };
+                    document.getElementById('profile-pic-large').onclick = () => document.getElementById('profile-pic-input').click();
+                    document.getElementById('profile-cover-photo').onclick = (e) => { if(e.target.id === 'profile-cover-photo') document.getElementById('cover-photo-input').click(); };
+                    document.getElementById('profile-pic-input').onchange = async (e) => {
                         if(e.target.files[0]) {
                             document.getElementById('pic-spinner').style.display = 'block';
-                            try {
-                                const url = await uploadToCloudinary(e.target.files[0]);
-                                await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url });
-                                currentUserData.profilePicURL = url;
-                                document.getElementById('profile-pic-large').src = url;
-                                document.getElementById('header-profile-pic').src = url;
-                                showToast('প্রোফাইল ছবি আপডেট হয়েছে!');
-                            } catch(err) { showToast('আপলোড ব্যর্থ হয়েছে'); }
+                            try { const url = await uploadToCloudinary(e.target.files[0]); await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url }); currentUserData.profilePicURL = url; document.getElementById('profile-pic-large').src = url; document.getElementById('header-profile-pic').src = url; document.getElementById('trigger-user-pic').src = url; showToast('প্রোফাইল ছবি আপডেট হয়েছে!'); } catch(err) { showToast('ব্যর্থ হয়েছে'); }
                             document.getElementById('pic-spinner').style.display = 'none';
                         }
                     };
-
-                    const coverInput = document.getElementById('cover-photo-input');
-                    const coverDiv = document.getElementById('profile-cover-photo');
-                    coverDiv.classList.add('editable');
-                    coverDiv.onclick = (e) => {
-                         if(e.target === coverDiv || e.target.classList.contains('editable')) {
-                             coverInput.click();
-                         }
-                    };
-                    
-                    coverInput.onchange = async (e) => {
+                    document.getElementById('cover-photo-input').onchange = async (e) => {
                          if(e.target.files[0]) {
                             document.getElementById('cover-spinner').style.display = 'block';
-                            try {
-                                const url = await uploadToCloudinary(e.target.files[0]);
-                                await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url });
-                                document.getElementById('profile-cover-photo').style.backgroundImage = `url(${url})`;
-                                showToast('কভার ফটো আপডেট হয়েছে!');
-                            } catch(err) { showToast('আপলোড ব্যর্থ হয়েছে'); }
+                            try { const url = await uploadToCloudinary(e.target.files[0]); await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url }); document.getElementById('profile-cover-photo').style.backgroundImage = `url(${url})`; showToast('কভার ফটো আপডেট হয়েছে!'); } catch(err) { showToast('ব্যর্থ হয়েছে'); }
                             document.getElementById('cover-spinner').style.display = 'none';
                         }
                     }
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function loadNewsfeedPosts() {
             const container = document.getElementById('newsfeed-container');
-            Array.from(container.children).forEach(child => {
-                if (!child.classList.contains('create-post')) child.remove();
-            });
-
-            const snapshot = await db.collection('posts').orderBy('createdAt', 'desc').limit(10).get();
+            Array.from(container.children).forEach(child => { if (!child.classList.contains('create-post-trigger-box')) child.remove(); });
+            const snapshot = await db.collection('posts').where('status', '==', 'approved').orderBy('createdAt', 'desc').limit(10).get();
             snapshot.forEach(doc => container.appendChild(renderPost(doc)));
         }
 
         async function loadUserPosts(uid) {
             const container = document.getElementById('user-posts-container');
             container.innerHTML = '<h3 style="text-align: center; color: var(--text-light); margin-bottom: 20px; font-size:16px;">পোস্টসমূহ</h3>';
-            const snapshot = await db.collection('posts').where('authorUid', '==', uid).orderBy('createdAt', 'desc').limit(10).get();
-            snapshot.forEach(doc => container.appendChild(renderPost(doc)));
+            let snapshot;
+            if (uid === auth.currentUser.uid) snapshot = await db.collection('posts').where('authorUid', '==', uid).orderBy('createdAt', 'desc').limit(10).get();
+            else snapshot = await db.collection('posts').where('authorUid', '==', uid).where('status', '==', 'approved').orderBy('createdAt', 'desc').limit(10).get();
+            
+            if(snapshot.empty) container.innerHTML += '<p style="text-align:center; color:#999;">কোনো পোস্ট নেই</p>';
+            else snapshot.forEach(doc => container.appendChild(renderPost(doc)));
         }
 
-        // --- INBOX, CHAT, SEARCH, UTILS ---
-        document.getElementById('inbox-btn').addEventListener('click', async () => {
-            navigateTo('inbox-page');
-            const list = document.getElementById('inbox-list');
-            list.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
-            const snapshot = await db.collection('users').doc(auth.currentUser.uid).collection('following').get();
-            list.innerHTML = '';
-            if(snapshot.empty) {
-                list.innerHTML = '<div style="text-align:center; padding:20px;">আপনি কাউকে ফলো করছেন না।</div>';
-                return;
+        // --- EVENT LISTENERS & GLOBAL ACTIONS ---
+        document.body.addEventListener('click', async function(e) {
+            // 3-DOT MENU LOGIC
+            if(e.target.closest('.post-menu-btn')) {
+                const btn = e.target.closest('.post-menu-btn');
+                const dropdown = btn.nextElementSibling;
+                document.querySelectorAll('.post-menu-dropdown').forEach(el => { if(el !== dropdown) el.classList.remove('show'); });
+                dropdown.classList.toggle('show');
+                e.stopPropagation();
+            } else {
+                document.querySelectorAll('.post-menu-dropdown').forEach(el => el.classList.remove('show'));
             }
-            for (let doc of snapshot.docs) {
-                const friendId = doc.id;
-                const userDoc = await db.collection('users').doc(friendId).get();
-                if(userDoc.exists) {
-                    const u = userDoc.data();
-                    // --- UPDATED: BADGE IN INBOX ---
-                    const badgeHtml = getVerificationHtml(u.isVerified, u.badgeExpiry);
-
-                    const item = document.createElement('div');
-                    item.className = 'inbox-item';
-                    item.innerHTML = `
-                        <img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" style="width:50px; height:50px; border-radius:50%; margin-right:15px;">
-                        <div>
-                            <h4 style="font-size:16px;">${u.fullName} ${badgeHtml}</h4>
-                            <p style="color:#777; font-size:12px;">চ্যাট করতে ট্যাপ করুন</p>
-                        </div>
-                    `;
-                    item.onclick = () => openChat(friendId, u.fullName, u.profilePicURL, u.isVerified, u.badgeExpiry);
-                    list.appendChild(item);
+            
+            // Delete Post
+            if(e.target.closest('.delete-post-opt')) {
+                if(confirm("আপনি কি এই পোস্টটি ডিলিট করতে চান?")) {
+                    const postEl = e.target.closest('.post');
+                    const postId = postEl.dataset.postId;
+                    await db.collection('posts').doc(postId).delete();
+                    postEl.remove();
+                    showToast("পোস্ট ডিলিট হয়েছে");
                 }
             }
-        });
-
-        // Updated OpenChat to accept badge info
-        function openChat(targetUid, name, pic, isVerified, badgeExpiry) {
-            document.getElementById('chat-page').classList.remove('d-none');
-            history.pushState({ page: 'chat-page' }, "", "#chat");
             
-            // --- UPDATED: BADGE IN CHAT HEADER ---
-            const badgeHtml = getVerificationHtml(isVerified, badgeExpiry);
-            document.getElementById('chat-header-name').innerHTML = `${name} ${badgeHtml}`;
-            
-            document.getElementById('chat-header-pic').src = pic || DEFAULT_PROFILE_PIC;
-            document.getElementById('chat-messages').innerHTML = '';
-            const chatId = [auth.currentUser.uid, targetUid].sort().join('_');
-            if(activeChatUnsubscribe) activeChatUnsubscribe();
-            activeChatUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
-                    const container = document.getElementById('chat-messages');
-                    container.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const msg = doc.data();
-                        const isMe = msg.senderUid === auth.currentUser.uid;
-                        const div = document.createElement('div');
-                        div.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
-                        div.innerHTML = `${msg.text} ${msg.imageUrl ? `<br><img src="${msg.imageUrl}" class="message-img">` : ''}<span class="message-time">${formatPostTime(msg.createdAt)}</span>`;
-                        container.appendChild(div);
+            // Hide Post (FIX 3: Save to DB)
+            if(e.target.closest('.hide-post-opt')) {
+                const postEl = e.target.closest('.post');
+                const postId = postEl.dataset.postId;
+                try {
+                    await db.collection('users').doc(auth.currentUser.uid).collection('hidden_posts').doc(postId).set({
+                        hiddenAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    container.scrollTop = container.scrollHeight;
-                });
-            document.getElementById('chat-form').onsubmit = async (e) => {
-                e.preventDefault();
-                const input = document.getElementById('chat-input');
-                const text = input.value.trim();
-                if(!text) return;
-                await db.collection('chats').doc(chatId).collection('messages').add({
-                    text: text, imageUrl: null, senderUid: auth.currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                input.value = '';
-            };
-        }
-
-        document.getElementById('back-from-chat').addEventListener('click', () => history.back());
-        document.getElementById('search-btn').addEventListener('click', () => { document.getElementById('search-page').classList.remove('d-none'); document.getElementById('global-search-input').focus(); history.pushState({page: 'search-page'}, "", "#search"); });
-        document.getElementById('close-search').addEventListener('click', () => history.back());
-        
-        document.getElementById('global-search-input').addEventListener('input', async (e) => {
-            const val = e.target.value.trim();
-            const resContainer = document.getElementById('search-results');
-            resContainer.innerHTML = '';
-            if(val.length < 2) return;
+                    postEl.style.display = 'none';
+                    showToast("পোস্ট হাইড করা হয়েছে");
+                } catch(err) { showToast("সমস্যা হয়েছে"); }
+            }
             
-            const snapshot = await db.collection('users').where('fullName', '>=', val).where('fullName', '<=', val + '\uf8ff').limit(5).get();
-            snapshot.forEach(doc => {
-                const u = doc.data();
-                // --- UPDATED: BADGE IN SEARCH ---
-                const badgeHtml = getVerificationHtml(u.isVerified, u.badgeExpiry);
-                
-                const div = document.createElement('div'); div.className = 'search-result-item';
-                div.innerHTML = `<img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" class="search-user-pic"><span>${u.fullName} ${badgeHtml}</span>`;
-                div.onclick = () => loadUserProfile(u.uid);
-                resContainer.appendChild(div);
-            });
-        });
+            // Unhide Post (FIX 3)
+            if(e.target.closest('.unhide-post-opt')) {
+                const postEl = e.target.closest('.post');
+                const postId = postEl.dataset.postId;
+                try {
+                    await db.collection('users').doc(auth.currentUser.uid).collection('hidden_posts').doc(postId).delete();
+                    postEl.remove(); // Remove from Hidden list view
+                    showToast("পোস্ট আন-হাইড করা হয়েছে");
+                } catch(err) { showToast("সমস্যা হয়েছে"); }
+            }
 
-        // --- GLOBAL ACTIONS (OPTIMISTIC UI) ---
-        document.body.addEventListener('click', async function(e) {
+             // Report Post
+            if(e.target.closest('.report-post-opt')) {
+                const postEl = e.target.closest('.post');
+                await db.collection('reports').add({
+                    postId: postEl.dataset.postId,
+                    reporterUid: auth.currentUser.uid,
+                    reason: 'User Report',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast("রিপোর্ট জমা হয়েছে");
+            }
+
+             // Like Logic
              const likeButton = e.target.closest('.like-btn');
              if (likeButton) {
                 const postElement = likeButton.closest('.post');
@@ -2068,49 +2562,28 @@
                 const countSpan = likeButton.querySelector('.like-count');
                 let currentCount = parseInt(countSpan.textContent);
                 const isLiked = heart.classList.contains('liked');
-
-                // OPTIMISTIC UPDATE
-                if(isLiked) {
-                    heart.classList.remove('liked', 'fas'); heart.classList.add('far');
-                    countSpan.textContent = currentCount - 1;
-                } else {
-                    heart.classList.add('liked', 'fas'); heart.classList.remove('far');
-                    countSpan.textContent = currentCount + 1;
-                }
-
+                if(isLiked) { heart.classList.remove('liked', 'fas'); heart.classList.add('far'); countSpan.textContent = currentCount - 1; } 
+                else { heart.classList.add('liked', 'fas'); heart.classList.remove('far'); countSpan.textContent = currentCount + 1; }
                 try {
                     const postRef = db.collection('posts').doc(postId);
                     const postDoc = await postRef.get();
                     const authorUid = postDoc.data().authorUid;
-                    const authorRef = db.collection('users').doc(authorUid);
-                    
                     await db.runTransaction(async (transaction) => {
                         const pd = await transaction.get(postRef);
                         const likes = pd.data().likes || [];
                         if (likes.includes(auth.currentUser.uid)) {
                             transaction.update(postRef, { likes: firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid) });
-                            transaction.update(authorRef, { totalLikes: firebase.firestore.FieldValue.increment(-1) });
+                            transaction.update(db.collection('users').doc(authorUid), { totalLikes: firebase.firestore.FieldValue.increment(-1) });
                         } else {
                             transaction.update(postRef, { likes: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid) });
-                            transaction.update(authorRef, { totalLikes: firebase.firestore.FieldValue.increment(1) });
+                            transaction.update(db.collection('users').doc(authorUid), { totalLikes: firebase.firestore.FieldValue.increment(1) });
                             if(authorUid !== auth.currentUser.uid) sendNotification(authorUid, 'like', postId);
                         }
                     });
-
-                    // UPDATED: Dynamic Score for like
                     if(!isLiked) updateActivityScore(auth.currentUser.uid, activityPoints.like, 'like');
-
                 } catch (err) {
-                    console.error("Like failed: ", err);
-                    // ROLLBACK
-                    if(isLiked) {
-                        heart.classList.add('liked', 'fas'); heart.classList.remove('far');
-                        countSpan.textContent = currentCount;
-                    } else {
-                        heart.classList.remove('liked', 'fas'); heart.classList.add('far');
-                        countSpan.textContent = currentCount;
-                    }
-                    showToast('Action failed, reverted.');
+                    if(isLiked) { heart.classList.add('liked', 'fas'); heart.classList.remove('far'); countSpan.textContent = currentCount; }
+                    else { heart.classList.remove('liked', 'fas'); heart.classList.add('far'); countSpan.textContent = currentCount; }
                 }
              }
 
@@ -2135,48 +2608,25 @@
                 const input = form.querySelector('.comment-input');
                 const text = input.value.trim();
                 const postId = form.closest('.post').dataset.postId;
-                
                 if(!text) return;
-
                 const list = form.closest('.post').querySelector('.comments-list');
-                // OPTIMISTIC APPEND
-                const fakeDiv = document.createElement('div');
-                fakeDiv.className = 'comment';
-                fakeDiv.style.opacity = '0.7';
-                
-                // For optimistic UI, we use current user data
-                const myBadgeHtml = getVerificationHtml(currentUserData.isVerified, currentUserData.badgeExpiry);
-                
-                fakeDiv.innerHTML = `<img src="${currentUserData.profilePicURL}" class="comment-user-pic"><div class="comment-body"><strong>${currentUserData.fullName} ${myBadgeHtml}</strong><span class="comment-text">${text}</span></div>`;
+                const fakeDiv = document.createElement('div'); fakeDiv.className = 'comment'; fakeDiv.style.opacity = '0.7';
+                fakeDiv.innerHTML = `<img src="${currentUserData.profilePicURL}" class="comment-user-pic"><div class="comment-body"><strong>${currentUserData.fullName}</strong><span class="comment-text">${text}</span></div>`;
                 list.appendChild(fakeDiv);
                 input.value = '';
-
                 try {
                     const postRef = db.collection('posts').doc(postId);
                     const postDoc = await postRef.get();
                     await postRef.collection('comments').add({
-                        text, 
-                        authorUid: auth.currentUser.uid, 
-                        authorName: currentUserData.fullName,
-                        authorProfilePic: currentUserData.profilePicURL,
-                        // Save verification snapshot for comments
-                        isVerified: currentUserData.isVerified || false,
-                        badgeExpiry: currentUserData.badgeExpiry || null,
+                        text, authorUid: auth.currentUser.uid, authorName: currentUserData.fullName, authorProfilePic: currentUserData.profilePicURL,
+                        isVerified: currentUserData.isVerified || false, badgeExpiry: currentUserData.badgeExpiry || null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
                     sendNotification(postDoc.data().authorUid, 'comment', postId);
-                    
-                    // UPDATED: Dynamic Score for comment
                     updateActivityScore(auth.currentUser.uid, activityPoints.comment, 'comment');
-
-                    // Reload to get real ID and allow edit/delete
                     loadComments(postId, list);
-                } catch (err) {
-                    fakeDiv.remove();
-                    input.value = text; // Restore text
-                    showToast('কমেন্ট ব্যর্থ হয়েছে');
-                }
+                } catch (err) { fakeDiv.remove(); input.value = text; showToast('ব্যর্থ হয়েছে'); }
             }
         });
 
@@ -2187,15 +2637,9 @@
                 const d = doc.data();
                 const div = document.createElement('div'); div.className = 'comment';
                 const isMy = d.authorUid === auth.currentUser.uid;
-                
-                // --- UPDATED: BADGE IN COMMENTS ---
                 const badgeHtml = getVerificationHtml(d.isVerified, d.badgeExpiry);
-
-                div.innerHTML = `<img src="${d.authorProfilePic}" class="comment-user-pic"><div class="comment-body"><strong>${d.authorName} ${badgeHtml}</strong><span class="comment-text">${d.text}</span></div>${isMy ? `<div class="comment-actions"><button class="comment-action-btn edit-cmt-btn"><i class="fas fa-edit"></i></button><button class="comment-action-btn del-cmt-btn"><i class="fas fa-trash"></i></button></div>` : ''}`;
-                if(isMy) {
-                    div.querySelector('.del-cmt-btn').onclick = async () => { if(confirm('Delete?')) { await db.collection('posts').doc(postId).collection('comments').doc(doc.id).delete(); await db.collection('posts').doc(postId).update({ commentsCount: firebase.firestore.FieldValue.increment(-1) }); loadComments(postId, container); } };
-                    div.querySelector('.edit-cmt-btn').onclick = () => openEditModal(d.text, doc.id, 'comments', postId);
-                }
+                div.innerHTML = `<img src="${d.authorProfilePic}" class="comment-user-pic"><div class="comment-body"><strong>${d.authorName} ${badgeHtml}</strong><span class="comment-text">${d.text}</span></div>${isMy ? `<div class="comment-actions"><button class="comment-action-btn del-cmt-btn"><i class="fas fa-trash"></i></button></div>` : ''}`;
+                if(isMy) div.querySelector('.del-cmt-btn').onclick = async () => { if(confirm('Delete?')) { await db.collection('posts').doc(postId).collection('comments').doc(doc.id).delete(); await db.collection('posts').doc(postId).update({ commentsCount: firebase.firestore.FieldValue.increment(-1) }); loadComments(postId, container); } };
                 container.appendChild(div);
             });
         }
@@ -2217,63 +2661,114 @@
         document.getElementById('open-name-modal').addEventListener('click', () => openModal('name-modal'));
         document.getElementById('save-name-btn').addEventListener('click', async () => {
             const newName = document.getElementById('new-fullname-input').value;
-            if(newName.trim()) {
-                await db.collection('users').doc(auth.currentUser.uid).update({ fullName: newName });
-                currentUserData.fullName = newName; closeModal('name-modal'); showToast('নাম পরিবর্তন হয়েছে!');
-            }
+            if(newName.trim()) { await db.collection('users').doc(auth.currentUser.uid).update({ fullName: newName }); currentUserData.fullName = newName; closeModal('name-modal'); showToast('নাম পরিবর্তন হয়েছে!'); }
         });
-
-        // Bio Modal Save
         document.getElementById('save-bio-btn').addEventListener('click', async () => {
             const bio = document.getElementById('new-bio-input').value;
-            await db.collection('users').doc(auth.currentUser.uid).update({ bio: bio });
-            currentUserData.bio = bio;
-            document.getElementById('profile-bio').textContent = bio;
-            closeModal('bio-modal');
-            showToast('বায়ো আপডেট হয়েছে');
+            await db.collection('users').doc(auth.currentUser.uid).update({ bio: bio }); currentUserData.bio = bio; document.getElementById('profile-bio').textContent = bio; closeModal('bio-modal'); showToast('বায়ো আপডেট হয়েছে');
         });
-
         document.getElementById('open-password-modal').addEventListener('click', () => openModal('password-modal'));
         document.getElementById('save-pass-btn').addEventListener('click', async () => {
             const currentPass = document.getElementById('modal-current-pass').value;
             const newPass = document.getElementById('modal-new-pass').value;
-            if(currentPass && newPass) {
-                const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, currentPass);
-                try { await auth.currentUser.reauthenticateWithCredential(cred); await auth.currentUser.updatePassword(newPass); closeModal('password-modal'); showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); } catch(e) { showToast('ত্রুটি: ' + e.message); }
-            }
+            if(currentPass && newPass) { try { const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, currentPass); await auth.currentUser.reauthenticateWithCredential(cred); await auth.currentUser.updatePassword(newPass); closeModal('password-modal'); showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); } catch(e) { showToast('ত্রুটি: ' + e.message); } }
         });
 
-        function openEditModal(text, docId, type, parentId) {
-            document.getElementById('edit-text-input').value = text; document.getElementById('edit-target-id').value = docId; document.getElementById('edit-target-collection').value = type; document.getElementById('edit-parent-id').value = parentId; openModal('edit-text-modal');
-        }
-        document.getElementById('save-edit-btn').addEventListener('click', async () => {
-            const text = document.getElementById('edit-text-input').value; const docId = document.getElementById('edit-target-id').value; const type = document.getElementById('edit-target-collection').value; const parentId = document.getElementById('edit-parent-id').value;
-            if(text.trim()) {
-                if(type === 'comments') {
-                    await db.collection('posts').doc(parentId).collection('comments').doc(docId).update({ text: text });
-                    loadComments(parentId, document.querySelector(`.post[data-post-id="${parentId}"]`).querySelector('.comments-list'));
-                }
-                closeModal('edit-text-modal');
-                showToast('আপডেট হয়েছে!');
-            }
-        });
+        // Navigation Bindings
+        document.getElementById('go-to-wallet').addEventListener('click', (e) => { e.preventDefault(); navigateTo('wallet-page'); loadWallet(); });
+        document.getElementById('go-to-leaderboard').addEventListener('click', (e) => { e.preventDefault(); navigateTo('leaderboard-page'); loadLeaderboard(); });
+        document.getElementById('go-to-subscription').addEventListener('click', (e) => { e.preventDefault(); navigateTo('subscription-page'); loadDepositHistory(); });
+        document.getElementById('go-to-hidden').addEventListener('click', (e) => { e.preventDefault(); navigateTo('hidden-posts-page'); loadHiddenPosts(); });
+        document.getElementById('go-to-withdraw').addEventListener('click', (e) => { e.preventDefault(); navigateTo('withdraw-page'); loadWithdrawHistory(); });
 
-        // New Navigation Logic for Wallet and Leaderboard
-        document.getElementById('go-to-wallet').addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            navigateTo('wallet-page'); 
-            loadWallet();
-        });
-        
-        document.getElementById('go-to-leaderboard').addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateTo('leaderboard-page');
-            loadLeaderboard();
-        });
-        
         document.getElementById('back-from-leaderboard').addEventListener('click', () => history.back());
+        document.getElementById('inbox-btn').addEventListener('click', async () => {
+            navigateTo('inbox-page');
+            const list = document.getElementById('inbox-list');
+            list.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
+            const snapshot = await db.collection('users').doc(auth.currentUser.uid).collection('following').get();
+            list.innerHTML = '';
+            if(snapshot.empty) { list.innerHTML = '<div style="text-align:center; padding:20px;">আপনি কাউকে ফলো করছেন না।</div>'; return; }
+            for (let doc of snapshot.docs) {
+                const friendId = doc.id;
+                const userDoc = await db.collection('users').doc(friendId).get();
+                if(userDoc.exists) {
+                    const u = userDoc.data();
+                    const item = document.createElement('div'); item.className = 'inbox-item';
+                    item.innerHTML = `<img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" style="width:50px; height:50px; border-radius:50%; margin-right:15px;"><div><h4 style="font-size:16px;">${u.fullName}</h4><p style="color:#777; font-size:12px;">চ্যাট করতে ট্যাপ করুন</p></div>`;
+                    item.onclick = () => openChat(friendId, u.fullName, u.profilePicURL, u.isVerified, u.badgeExpiry);
+                    list.appendChild(item);
+                }
+            }
+        });
 
-        // Auth logic
+        function openChat(targetUid, name, pic, isVerified, badgeExpiry) {
+            document.getElementById('chat-page').classList.remove('d-none');
+            history.pushState({ page: 'chat-page' }, "", "#chat");
+            const badgeHtml = getVerificationHtml(isVerified, badgeExpiry);
+            document.getElementById('chat-header-name').innerHTML = `${name} ${badgeHtml}`;
+            document.getElementById('chat-header-pic').src = pic || DEFAULT_PROFILE_PIC;
+            document.getElementById('chat-messages').innerHTML = '';
+            const chatId = [auth.currentUser.uid, targetUid].sort().join('_');
+            if(activeChatUnsubscribe) activeChatUnsubscribe();
+            activeChatUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                const container = document.getElementById('chat-messages'); container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const isMe = msg.senderUid === auth.currentUser.uid;
+                    const div = document.createElement('div'); div.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
+                    div.innerHTML = `${msg.text} ${msg.imageUrl ? `<br><img src="${msg.imageUrl}" class="message-img">` : ''}<span class="message-time">${formatPostTime(msg.createdAt)}</span>`;
+                    container.appendChild(div);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+            document.getElementById('chat-form').onsubmit = async (e) => {
+                e.preventDefault(); const input = document.getElementById('chat-input'); const text = input.value.trim();
+                if(!text) return;
+                await db.collection('chats').doc(chatId).collection('messages').add({ text: text, imageUrl: null, senderUid: auth.currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                input.value = '';
+            };
+        }
+        document.getElementById('back-from-chat').addEventListener('click', () => history.back());
+
+        // SEARCH
+        document.getElementById('search-btn').addEventListener('click', () => { document.getElementById('search-page').classList.remove('d-none'); document.getElementById('global-search-input').focus(); history.pushState({page: 'search-page'}, "", "#search"); });
+        document.getElementById('close-search').addEventListener('click', () => history.back());
+        
+        document.getElementById('global-search-input').addEventListener('input', async (e) => {
+            const val = e.target.value.trim();
+            const resContainer = document.getElementById('search-results');
+            resContainer.innerHTML = '';
+            
+            // Check if input is a Post ID (Assuming ID length > 15)
+            if(val.length > 15) {
+                try {
+                    const postDoc = await db.collection('posts').doc(val).get();
+                    if(postDoc.exists && postDoc.data().status === 'approved') {
+                        const div = document.createElement('div');
+                        div.style.padding = "10px";
+                        div.innerHTML = "<strong>পোস্ট পাওয়া গেছে:</strong>";
+                        resContainer.appendChild(div);
+                        resContainer.appendChild(renderPost(postDoc));
+                    }
+                } catch(e) { console.log("Not a post ID"); }
+            }
+
+            if(val.length < 2) return;
+            const snapshot = await db.collection('users').where('fullName', '>=', val).where('fullName', '<=', val + '\uf8ff').limit(5).get();
+            if(!snapshot.empty) {
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    const badgeHtml = getVerificationHtml(u.isVerified, u.badgeExpiry);
+                    const div = document.createElement('div'); div.className = 'search-result-item';
+                    div.innerHTML = `<img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" class="search-user-pic"><span>${u.fullName} ${badgeHtml}</span>`;
+                    div.onclick = () => loadUserProfile(u.uid);
+                    resContainer.appendChild(div);
+                });
+            }
+        });
+
+        // Auth Navigation & Forms
         document.getElementById('go-to-login').addEventListener('click', (e) => { e.preventDefault(); navigateTo('login-page', false); });
         document.getElementById('go-to-signup').addEventListener('click', (e) => { e.preventDefault(); navigateTo('signup-page', false); });
         document.getElementById('header-logo-btn').addEventListener('click', () => navigateTo('home-page'));
@@ -2282,25 +2777,34 @@
         document.getElementById('header-profile-pic').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('profile-dropdown').classList.toggle('show'); document.getElementById('notification-dropdown').classList.remove('show'); });
         document.getElementById('notif-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('notification-dropdown').classList.toggle('show'); document.getElementById('profile-dropdown').classList.remove('show'); });
         window.addEventListener('click', () => document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show')));
-        document.getElementById('add-image-btn').addEventListener('click', () => document.getElementById('post-image-input').click());
         
         document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); try { await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value); } catch(err) { showToast(err.message); }
+            e.preventDefault();
+            setBtnLoading('login-btn', true);
+            try { await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value); } 
+            catch(err) { showToast(err.message); setBtnLoading('login-btn', false); }
         });
+
         document.getElementById('signup-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            setBtnLoading('signup-btn', true);
             try {
-                const cred = await auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value);
+                const fullname = document.getElementById('fullname').value;
+                const dob = document.getElementById('dob').value;
+                const gender = document.getElementById('gender').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
                 let picUrl = DEFAULT_PROFILE_PIC, coverUrl = '';
                 if(document.getElementById('profile-pic-signup').files[0]) picUrl = await uploadToCloudinary(document.getElementById('profile-pic-signup').files[0]);
                 if(document.getElementById('cover-photo-signup').files[0]) coverUrl = await uploadToCloudinary(document.getElementById('cover-photo-signup').files[0]);
                 await db.collection('users').doc(cred.user.uid).set({
-                    uid: cred.user.uid, fullName: document.getElementById('fullname').value, email: document.getElementById('email').value, profilePicURL: picUrl, coverPhotoURL: coverUrl, followingCount: 0, followerCount: 0, totalLikes: 0, bio: '', walletBalance: 0.00
+                    uid: cred.user.uid, fullName: fullname, email: email, dob: dob, gender: gender,
+                    profilePicURL: picUrl, coverPhotoURL: coverUrl, followingCount: 0, followerCount: 0, totalLikes: 0, bio: '', walletBalance: 0.00, createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                showToast('সফল!');
-            } catch(err) { showToast(err.message); }
+                showToast('সাইন আপ সফল!');
+            } catch(err) { showToast(err.message); setBtnLoading('signup-btn', false); }
         });
     </script>
-    <script type='text/javascript' src='//pl28088413.effectivegatecpm.com/15/b5/aa/15b5aa6d1f71c29e658b7216f85f9314.js'></script>
 </body>
 </html>
