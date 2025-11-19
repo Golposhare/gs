@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GolpoShare - আপনার গল্প শেয়ার করুন</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        :root {
+            --primary: #1e88e5;
+            --primary-dark: #1565c0;
+            --primary-light: #64b5f6;
+            --accent: #ff4081;
+            --text: #212121;
+            --text-light: #757575;
+            --background: #f5f5f5;
+            --surface: #ffffff;
+            --error: #f44336;
+            --success: #4caf50;
+            --chat-sent: #e3f2fd;
+            --chat-received: #f5f5f5;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* --- UPDATED: VERIFIED BADGE STYLE --- */
+        .verified-badge {
+            color: #1e88e5;
+            font-size: 14px;
+            margin-left: 4px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        /* -------------------------------- */
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background-color: #323232;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 250px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background-color: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .auth-footer a {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Header & Nav Icons */
+        .header {
+            background-color: var(--surface);
+            color: var(--text);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-icon-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text);
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+        }
+        
+        .nav-icon-btn:hover {
+            color: var(--primary);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--error);
+            color: white;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .notification-badge.show {
+            display: block;
+        }
+
+        .profile-menu {
+            position: relative;
+        }
+
+        .profile-pic {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--surface);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            width: 220px;
+            display: none;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        
+        #notification-dropdown {
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .notification-item:hover { background-color: #f9f9f9; }
+        .notification-item.unread { background-color: #e3f2fd; }
+        .notif-pic { width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; }
+
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--text);
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Newsfeed */
+        .newsfeed {
+            padding: 20px 0;
+            padding-bottom: 80px;
+        }
+
+        .create-post {
+            background-color: var(--surface);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .post-input {
+            width: 100%;
+            border: none;
+            padding: 12px 5px;
+            font-size: 16px;
+            resize: none;
+            margin-bottom: 10px;
+            outline: none;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .action-btn i {
+            margin-right: 5px;
+            color: var(--success);
+        }
+
+        .post {
+            background-color: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .post-user-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .post-user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .post-user-info h3:hover { text-decoration: underline; }
+
+        .post-user-info p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .post-content {
+            padding: 0 15px 15px;
+        }
+        .post-content p {
+            white-space: pre-wrap;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            max-height: 500px;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .post-engagement {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .engagement-btn {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            flex-grow: 1;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .engagement-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .engagement-btn i {
+            margin-right: 5px;
+        }
+        .engagement-btn .fa-heart.liked {
+            color: var(--accent);
+            font-weight: 900;
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+        
+        /* Comments Section */
+        .comment-section {
+            padding: 0 15px 15px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+        .add-comment-form {
+            display: flex;
+            margin-top: 10px;
+        }
+        .comment-input {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin-right: 10px;
+        }
+        .comment-submit-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .comments-list {
+            margin-top: 15px;
+        }
+        .comment {
+            display: flex;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .comment-user-pic {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .comment-body {
+            background-color: #f0f2f5;
+            border-radius: 15px;
+            padding: 8px 12px;
+            font-size: 14px;
+            flex-grow: 1;
+        }
+        .comment-body strong {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 5px;
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 5px;
+        }
+        .comment-action-btn {
+            border: none;
+            background: none;
+            color: #777;
+            cursor: pointer;
+        }
+        .comment-action-btn:hover { color: var(--primary); }
+
+        /* Profile Page */
+        .profile-header {
+            background-color: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .cover-photo {
+            height: 200px;
+            background-color: var(--primary-light);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            cursor: default;
+        }
+        /* Clickable cover photo for self */
+        .cover-photo.editable {
+            cursor: pointer;
+        }
+        .cover-photo.editable:hover::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
+            padding: 0 20px 20px;
+            position: relative;
+            margin-top: -60px;
+            text-align: center;
+        }
+
+        .profile-pic-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--surface);
+            cursor: pointer;
+            display: inline-block;
+            background: #eee;
+        }
+
+        .profile-details {
+            margin-top: 10px;
+        }
+        
+        .profile-details h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-details p {
+            color: var(--text-light);
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .edit-bio-btn {
+            font-size: 12px;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+            vertical-align: middle;
+            display: none; /* Hidden by default */
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-count {
+            font-weight: 600;
+            font-size: 16px;
+            display: block;
+        }
+        .stat-label {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+
+        /* Search Overlay */
+        .search-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--surface);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        .search-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .search-input {
+            flex-grow: 1;
+            border: none;
+            font-size: 18px;
+            padding: 10px;
+            outline: none;
+        }
+        .search-results {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+        }
+        .search-result-item:hover { background: #f9f9f9; }
+        .search-user-pic { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
+
+        /* Inbox & Chat */
+        .inbox-list {
+            background: var(--surface);
+            min-height: 100vh;
+        }
+        .inbox-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .inbox-item:hover { background-color: #f9f9f9; }
+        
+        /* Chat Interface */
+        .chat-interface {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--surface);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chat-user-details { display: flex; align-items: center; }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message-bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .message-bubble.sent {
+            align-self: flex-end;
+            background-color: var(--chat-sent);
+            border-top-right-radius: 0;
+        }
+        .message-bubble.received {
+            align-self: flex-start;
+            background-color: var(--surface);
+            border-top-left-radius: 0;
+        }
+        .message-img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
+        .message-time { font-size: 10px; color: #777; text-align: right; margin-top: 2px; display: block;}
+        .chat-input-area {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+        }
+        
+        .msg-options-btn {
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            background: none;
+            border: none;
+            font-size: 10px;
+            color: #999;
+            cursor: pointer;
+            display: none;
+        }
+        .message-bubble:hover .msg-options-btn {
+            display: block;
+        }
+
+        /* Settings Page */
+        .settings-container {
+            padding: 20px 0;
+        }
+        .settings-card {
+            background-color: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .settings-card h3 {
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        /* LEADERBOARD STYLES */
+        .leaderboard-header {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 20px;
+        }
+        .leaderboard-list {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 80px; /* Space for sticky footer */
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .rank-num {
+            width: 30px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-align: center;
+        }
+        .rank-1 { color: var(--gold); font-size: 20px; }
+        .rank-2 { color: var(--silver); font-size: 18px; }
+        .rank-3 { color: var(--bronze); font-size: 18px; }
+        
+        .lb-user-info {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+        .lb-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 10px;
+            object-fit: cover;
+        }
+        .lb-score {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .my-rank-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        .lb-stats-mini {
+            font-size: 10px;
+            color: #888;
+            margin-left: 10px;
+        }
+
+        /* Wallet Styles */
+        .wallet-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(21, 101, 192, 0.3);
+        }
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Utility Classes */
+        .d-none {
+            display: none !important;
+        }
+        .mt-3 {
+            margin-top: 15px;
+        }
+        .upload-spinner {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary);
+            font-size: 30px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            padding: 10px;
+            display: none;
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Sign Up Page -->
+    <div id="signup-page" class="auth-container d-none">
+        <div class="auth-card">
+            <div class="logo">
+                <h1>GolpoShare</h1>
+                <p>আপনার গল্প শেয়ার করুন</p>
+            </div>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label for="fullname">পুরো নাম</label>
+                    <input type="text" id="fullname" class="form-control" placeholder="আপনার পুরো নাম লিখুন" required>
+                </div>
+                <div class="form-group">
+                    <label for="dob">জন্ম তারিখ</label>
+                    <input type="date" id="dob" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">লিঙ্গ</label>
+                    <select id="gender" class="form-control" required>
+                        <option value="">লিঙ্গ নির্বাচন করুন</option>
+                        <option value="male">পুরুষ</option>
+                        <option value="female">মহিলা</option>
+                        <option value="other">অন্যান্য</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="email">ইমেইল</label>
+                    <input type="email" id="email" class="form-control" placeholder="আপনার ইমেইল লিখুন" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">পাসওয়ার্ড</label>
+                    <input type="password" id="password" class="form-control" placeholder="পাসওয়ার্ড লিখুন" required>
+                </div>
+                <div class="form-group">
+                    <label for="profile-pic-signup">প্রোফাইল ছবি</label>
+                    <input type="file" id="profile-pic-signup" class="form-control" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="cover-photo-signup">কভার ফটো</label>
+                    <input type="file" id="cover-photo-signup" class="form-control" accept="image/*">
+                </div>
+                <button type="submit" class="btn">সাইন আপ</button>
+            </form>
+            <p class="text-center mt-3">ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" id="go-to-login">লগইন করুন</a></p>
+        </div>
+    </div>
+
+    <!-- Login Page (Default) -->
+    <div id="login-page" class="auth-container">
+        <div class="auth-card">
+            <div class="logo">
+                <h1>GolpoShare</h1>
+                <p>আপনার গল্প শেয়ার করুন</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">ইমেইল</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="আপনার ইমেইল লিখুন" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">পাসওয়ার্ড</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="পাসওয়ার্ড লিখুন" required>
+                </div>
+                <button type="submit" class="btn">লগইন</button>
+            </form>
+            <p class="text-center mt-3">অ্যাকাউন্ট নেই? <a href="#" id="go-to-signup">সাইন আপ করুন</a></p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div id="app-header" class="header d-none">
+        <div class="container">
+            <div class="header-content">
+                <h1 id="header-logo-btn">GolpoShare</h1>
+                <div class="nav-icons">
+                    <button class="nav-icon-btn" id="search-btn"><i class="fas fa-search"></i></button>
+                    <button class="nav-icon-btn" id="inbox-btn"><i class="fas fa-envelope"></i></button>
+                    <button class="nav-icon-btn" id="notif-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notif-badge">0</span>
+                    </button>
+                    <div class="dropdown-menu" id="notification-dropdown">
+                        <div style="padding:10px; text-align:center; color:#777;">কোনো নতুন নোটিফিকেশন নেই</div>
+                    </div>
+                    <div class="profile-menu">
+                        <img src="" alt="Profile" class="profile-pic" id="header-profile-pic">
+                        <div class="dropdown-menu" id="profile-dropdown">
+                            <a href="#" class="dropdown-item" id="nav-profile"><i class="fas fa-user"></i> আমার প্রোফাইল</a>
+                            <a href="#" class="dropdown-item" id="nav-settings"><i class="fas fa-cog"></i> সেটিংস</a>
+                            <a href="#" class="dropdown-item" id="nav-logout"><i class="fas fa-sign-out-alt"></i> লগআউট</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="home-page" class="d-none app-view">
+        <div class="container">
+            <div class="newsfeed" id="newsfeed-container">
+                <div class="create-post">
+                    <textarea id="post-text-input" class="post-input" placeholder="আপনার মনে কি আছে?..."></textarea>
+                    <input type="file" id="post-image-input" accept="image/*" style="display: none;">
+                    <div class="post-actions">
+                        <div>
+                            <button class="action-btn" id="add-image-btn"><i class="fas fa-image"></i> ছবি যোগ করুন</button>
+                        </div>
+                        <button class="btn" id="create-post-btn" style="width: auto; padding: 8px 20px;">পোস্ট করুন</button>
+                    </div>
+                </div>
+                <!-- Posts loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile-page" class="d-none app-view">
+        <div class="container">
+            <div class="profile-header">
+                <div class="cover-photo" id="profile-cover-photo">
+                    <input type="file" id="cover-photo-input" accept="image/*" style="display: none;">
+                    <i class="fas fa-spinner fa-spin upload-spinner" id="cover-spinner"></i>
+                </div>
+                <div class="profile-info">
+                    <div style="position: relative; display: inline-block;">
+                        <input type="file" id="profile-pic-input" accept="image/*" style="display: none;">
+                        <img src="" alt="Profile" class="profile-pic-large" id="profile-pic-large">
+                         <i class="fas fa-spinner fa-spin upload-spinner" id="pic-spinner"></i>
+                    </div>
+                    <div class="profile-details">
+                        <div style="display:flex; justify-content:center; align-items:center; gap:10px;">
+                            <h2 id="profile-name">ব্যবহারকারীর নাম</h2>
+                        </div>
+                        <div>
+                            <p id="profile-bio">বায়ো</p>
+                            <button class="edit-bio-btn" id="edit-bio-trigger"><i class="fas fa-pen"></i></button>
+                        </div>
+                        
+                        <div id="profile-actions" style="margin-bottom: 10px;">
+                             <button class="btn" id="follow-btn" style="width: auto; padding: 5px 15px; font-size: 14px; display:none;">Follow</button>
+                             <button class="btn" id="msg-btn" style="width: auto; padding: 5px 15px; font-size: 14px; margin-left:5px; display:none;"><i class="fas fa-comment"></i> Message</button>
+                        </div>
+
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-count" id="following-count">0</span>
+                                <span class="stat-label">Following</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-count" id="follower-count">0</span>
+                                <span class="stat-label">Followers</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-count" id="like-count">0</span>
+                                <span class="stat-label">Total Likes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="newsfeed" id="user-posts-container">
+                <!-- User posts -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inbox Page -->
+    <div id="inbox-page" class="d-none app-view">
+        <div class="container">
+            <h2 style="padding: 15px 0; font-size: 20px;">ইনবক্স</h2>
+            <div class="inbox-list" id="inbox-list">
+                <div style="text-align:center; padding:20px; color:#777;">লোড হচ্ছে...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chat-page" class="chat-interface d-none">
+        <div class="chat-header">
+            <div class="chat-user-details">
+                <button id="back-from-chat" style="background:none; border:none; color:white; font-size:18px; margin-right:10px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+                <img src="" id="chat-header-pic" style="width:35px; height:35px; border-radius:50%; margin-right:10px;">
+                <span id="chat-header-name" style="font-weight:600;">Name</span>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages -->
+        </div>
+        <form id="chat-form" class="chat-input-area">
+            <input type="file" id="chat-img-input" accept="image/*" style="display:none;">
+            <button type="button" id="chat-img-btn" style="background:none; border:none; font-size:20px; color:var(--primary); margin-right:10px; cursor:pointer;"><i class="fas fa-image"></i></button>
+            <input type="text" id="chat-input" class="form-control" placeholder="মেসেজ লিখুন..." style="border-radius:20px;" autocomplete="off">
+            <button type="submit" style="background:none; border:none; font-size:20px; color:var(--primary); margin-left:10px; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-page" class="search-overlay d-none">
+        <div class="search-header">
+            <button id="close-search" style="background:none; border:none; font-size:20px; margin-right:10px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+            <input type="text" id="global-search-input" class="search-input" placeholder="সার্চ করুন (নাম অথবা পোস্ট ID)...">
+        </div>
+        <div class="search-results" id="search-results">
+            <div style="text-align:center; color:#999; margin-top:20px;">ব্যবহারকারী বা পোস্ট খুঁজতে লিখুন</div>
+        </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div id="settings-page" class="d-none app-view">
+        <div class="container settings-container">
+            <h2 style="margin-bottom:20px;">সেটিংস</h2>
+            <div class="settings-card">
+                <h3>সাধারণ তথ্য</h3>
+                <div class="dropdown-item" id="open-name-modal" style="cursor: pointer;">
+                    <i class="fas fa-user-edit"></i> নাম পরিবর্তন করুন
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>অ্যাক্টিভিটি ও রিওয়ার্ড</h3>
+                <a href="#" id="go-to-leaderboard" class="dropdown-item" style="padding-left: 0; color: var(--text);">
+                    <i class="fas fa-trophy" style="color: gold;"></i> Leaderboard & Activities
+                </a>
+            </div>
+            <div class="settings-card">
+                <h3>নিরাপত্তা</h3>
+                <div class="dropdown-item" id="open-password-modal" style="cursor: pointer;">
+                     <i class="fas fa-lock"></i> পাসওয়ার্ড পরিবর্তন করুন
+                </div>
+            </div>
+            <div class="settings-card">
+                <h3>অর্থায়ন</h3>
+                <a href="#" id="go-to-wallet" class="dropdown-item" style="border-bottom: 1px solid #eee; padding-left: 0; color: var(--text);"><i class="fas fa-wallet"></i> ওয়ালেট</a>
+                <a href="#" id="go-to-subscription" class="dropdown-item" style="padding-left: 0; color: var(--text);"><i class="fas fa-credit-card"></i> পেমেন্ট ও সাবস্ক্রিপশন</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaderboard Page -->
+    <div id="leaderboard-page" class="d-none app-view">
+        <div class="container" style="padding: 0;">
+            <div class="leaderboard-header">
+                <button id="back-from-leaderboard" style="float: left; background:none; border:none; color:white; font-size:18px; cursor:pointer;"><i class="fas fa-arrow-left"></i></button>
+                <h2>লিডারবোর্ড (সাপ্তাহিক)</h2>
+                <p style="font-size:12px; opacity:0.8;">সেরা ৩ জন প্রতি সপ্তাহে পাবে $0.70!</p>
+            </div>
+            <div class="container">
+                <div id="leaderboard-list" class="leaderboard-list">
+                    <div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>
+                </div>
+            </div>
+            <div class="my-rank-footer" id="my-rank-footer">
+                <div style="display:flex; align-items:center;">
+                    <span style="font-weight:bold;">আমার অবস্থান:</span>
+                    <span id="my-rank-display" style="margin-left:10px; color:var(--primary); font-weight:700;">#--</span>
+                </div>
+                <div id="my-score-display">স্কোর: 0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Page -->
+    <div id="wallet-page" class="d-none app-view">
+        <div class="container" style="padding: 20px 0;">
+            <h2 style="margin-bottom:20px;">আমার ওয়ালেট</h2>
+            <div class="wallet-card">
+                <p>বর্তমান ব্যালেন্স</p>
+                <div class="balance-amount" id="wallet-balance">$0.00</div>
+                <p style="font-size:12px; opacity:0.8;">রিওয়ার্ড থেকে আয়</p>
+            </div>
+            <div class="settings-card">
+                <h3>লেনদেনের ইতিহাস</h3>
+                <div id="transaction-list">
+                    <p style="color:#777; text-align:center;">কোনো লেনদেন পাওয়া যায়নি</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="subscription-page" class="d-none app-view">
+        <div class="container" style="padding: 20px 0; text-align: center;">
+            <h2>পেমেন্ট ও সাবস্ক্রিপশন পেজ শীঘ্রই আসছে...</h2>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="name-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">নাম পরিবর্তন</h3>
+            <input type="text" id="new-fullname-input" class="form-control" placeholder="নতুন নাম লিখুন">
+            <div class="modal-actions">
+                <button class="btn btn-outline" style="width:auto;" onclick="closeModal('name-modal')">বাতিল</button>
+                <button class="btn" style="width:auto;" id="save-name-btn">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Bio Modal -->
+    <div id="bio-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">বায়ো পরিবর্তন</h3>
+            <textarea id="new-bio-input" class="form-control" rows="3" placeholder="আপনার বায়ো লিখুন..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-outline" style="width:auto;" onclick="closeModal('bio-modal')">বাতিল</button>
+                <button class="btn" style="width:auto;" id="save-bio-btn">আপডেট</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">পাসওয়ার্ড পরিবর্তন</h3>
+            <input type="password" id="modal-current-pass" class="form-control" placeholder="বর্তমান পাসওয়ার্ড" style="margin-bottom:10px;">
+            <input type="password" id="modal-new-pass" class="form-control" placeholder="নতুন পাসওয়ার্ড">
+            <div class="modal-actions">
+                <button class="btn btn-outline" style="width:auto;" onclick="closeModal('password-modal')">বাতিল</button>
+                <button class="btn" style="width:auto;" id="save-pass-btn">পরিবর্তন করুন</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="edit-text-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">এডিট করুন</h3>
+            <input type="text" id="edit-text-input" class="form-control" placeholder="লিখুন...">
+            <input type="hidden" id="edit-target-id">
+            <input type="hidden" id="edit-target-collection">
+            <input type="hidden" id="edit-parent-id">
+            <div class="modal-actions">
+                <button class="btn btn-outline" style="width:auto;" onclick="closeModal('edit-text-modal')">বাতিল</button>
+                <button class="btn" style="width:auto;" id="save-edit-btn">আপডেট</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3U9bOTNl1KZk_ncwjQj-6CFKzsTvfjJE",
+            authDomain: "golposharex.firebaseapp.com",
+            projectId: "golposharex",
+            storageBucket: "golposharex.appspot.com",
+            messagingSenderId: "797216316412",
+            appId: "1:797216316412:web:e278c5075d5b83f5ee3079",
+            measurementId: "G-TCPHD5HCGZ"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        let currentUserData = {};
+        let activeChatUnsubscribe = null;
+        let sessionTimer = null; // For tracking browse time
+        
+        // --- NEW: DYNAMIC POINTS SYSTEM ---
+        // Default values (will be overwritten by Admin Panel settings)
+        let activityPoints = {
+            post: 10,
+            like: 2,
+            comment: 5,
+            browse: 1
+        };
+
+        const DEFAULT_PROFILE_PIC = 'https://res.cloudinary.com/dzmo138qb/image/upload/v1763471321/images_19_iteqms.jpg';
+        const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dntvrm1wn/image/upload';
+        const CLOUDINARY_UPLOAD_PRESET = 'ml_default';
+
+        // --- UI HELPERS ---
+        
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function formatPostTime(timestamp) {
+            if (!timestamp) return 'Just now';
+            const date = new Date(timestamp.seconds * 1000);
+            const now = new Date();
+            const diff = now - date;
+            const days = diff / (1000 * 60 * 60 * 24);
+            const hours = diff / (1000 * 60 * 60);
+            const minutes = diff / (1000 * 60);
+
+            if (days > 7) {
+                return date.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } else if (days >= 1) {
+                return Math.floor(days) + ' days ago';
+            } else if (hours >= 1) {
+                return Math.floor(hours) + 'h ago';
+            } else if (minutes >= 1) {
+                return Math.floor(minutes) + ' min ago';
+            } else {
+                return 'Just now';
+            }
+        }
+
+        // --- NEW: VERIFICATION BADGE HELPER ---
+        // This function is now used EVERYWHERE a name is displayed
+        function getVerificationHtml(isVerified, badgeExpiry) {
+            if (!isVerified) return '';
+            if (badgeExpiry && badgeExpiry.seconds * 1000 < Date.now()) {
+                return ''; // Expired
+            }
+            return '<i class="fas fa-check-circle verified-badge" title="Verified"></i>';
+        }
+        // --------------------------------------
+        
+        // --- NEW: LOAD ADMIN SETTINGS ---
+        async function loadSystemSettings() {
+            try {
+                const doc = await db.collection('system').doc('settings').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if(data.points_post) activityPoints.post = data.points_post;
+                    if(data.points_like) activityPoints.like = data.points_like;
+                    if(data.points_comment) activityPoints.comment = data.points_comment;
+                    if(data.points_browse) activityPoints.browse = data.points_browse;
+                    console.log("Admin points loaded:", activityPoints);
+                }
+            } catch(e) {
+                console.log("Using default points.");
+            }
+        }
+
+        function navigateTo(newPageId, addToHistory = true) {
+            document.querySelectorAll('.auth-container').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.app-view, .chat-interface, .search-overlay').forEach(el => el.classList.add('d-none'));
+            
+            if (newPageId !== 'login-page' && newPageId !== 'signup-page') {
+                document.getElementById('app-header').classList.remove('d-none');
+                document.getElementById(newPageId).classList.remove('d-none');
+            } else {
+                document.getElementById('app-header').classList.add('d-none');
+                document.getElementById(newPageId).classList.remove('d-none');
+            }
+            window.scrollTo(0,0);
+            if (addToHistory) {
+                history.pushState({ page: newPageId }, "", `#${newPageId.replace('-page', '')}`);
+            }
+        }
+
+        window.onpopstate = function(event) {
+            if (event.state && event.state.page) {
+                navigateTo(event.state.page, false);
+            } else {
+                if (auth.currentUser) navigateTo('home-page', false);
+                else navigateTo('login-page', false);
+            }
+        };
+
+        // --- AUTH & INIT ---
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                // Load admin settings first
+                await loadSystemSettings();
+
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+
+                    // CHECK ACCOUNT DISABLED STATUS
+                    if (data.isDisabled === true) {
+                        await auth.signOut();
+                        alert("আপনার অ্যাকাউন্টটি অ্যাডমিন দ্বারা নিষ্ক্রিয় (Disabled) করা হয়েছে।");
+                        return;
+                    }
+
+                    currentUserData = data;
+                    updateHeaderProfile(currentUserData);
+                    initNotificationListener(user.uid);
+                    startSessionTracking(user.uid); // Start tracking time
+                    navigateTo('home-page');
+                    loadNewsfeedPosts(); 
+                } else {
+                    logout();
+                }
+            } else {
+                currentUserData = {};
+                stopSessionTracking();
+                navigateTo('login-page', false);
+            }
+        });
+
+        function updateHeaderProfile(data) {
+            const picUrl = data.profilePicURL || DEFAULT_PROFILE_PIC;
+            document.getElementById('header-profile-pic').src = picUrl;
+        }
+
+        // --- NOTIFICATION SYSTEM ---
+        function initNotificationListener(uid) {
+            db.collection('users').doc(uid).collection('notifications')
+                .orderBy('createdAt', 'desc')
+                .limit(20)
+                .onSnapshot(snapshot => {
+                    const notifContainer = document.getElementById('notification-dropdown');
+                    const badge = document.getElementById('notif-badge');
+                    let unreadCount = 0;
+                    
+                    notifContainer.innerHTML = '';
+                    if(snapshot.empty) {
+                        notifContainer.innerHTML = '<div style="padding:10px; text-align:center; color:#777;">কোনো নতুন নোটিফিকেশন নেই</div>';
+                    }
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (!data.read) unreadCount++;
+                        const item = document.createElement('div');
+                        item.className = `notification-item ${!data.read ? 'unread' : ''}`;
+                        
+                        // UPDATED: Badge in notifications
+                        // Assuming sender might have verification, we fetch or store it. 
+                        // Note: For best performance, senderIsVerified should be stored in notification doc.
+                        // Falling back to name only if not available, or add if you update sendNotification logic.
+                        
+                        item.innerHTML = `
+                            <img src="${data.senderPic || DEFAULT_PROFILE_PIC}" class="notif-pic">
+                            <div>
+                                <strong>${data.senderName}</strong> ${getNotifText(data.type)}
+                            </div>
+                        `;
+                        item.onclick = () => handleNotificationClick(doc.id, data);
+                        notifContainer.appendChild(item);
+                    });
+
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.classList.add('show');
+                    } else {
+                        badge.classList.remove('show');
+                    }
+                });
+        }
+
+        function getNotifText(type) {
+            if (type === 'like') return 'আপনার পোস্টে লাইক দিয়েছেন।';
+            if (type === 'comment') return 'আপনার পোস্টে কমেন্ট করেছেন।';
+            if (type === 'follow') return 'আপনাকে ফলো করছেন।';
+            if (type === 'reward') return 'লিডারবোর্ড রিওয়ার্ড!';
+            return 'আপনাকে একটি নোটিফিকেশন পাঠিয়েছেন।';
+        }
+
+        async function handleNotificationClick(docId, data) {
+            await db.collection('users').doc(auth.currentUser.uid).collection('notifications').doc(docId).update({read: true});
+            if (data.postId) navigateTo('home-page'); 
+            else if (data.senderUid) loadUserProfile(data.senderUid);
+        }
+
+        async function sendNotification(targetUid, type, postId = null) {
+            if (targetUid === auth.currentUser.uid) return;
+            await db.collection('users').doc(targetUid).collection('notifications').add({
+                type: type,
+                senderUid: auth.currentUser.uid,
+                senderName: currentUserData.fullName,
+                senderPic: currentUserData.profilePicURL,
+                postId: postId,
+                read: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+
+        // --- NEWSFEED & POSTS ---
+        function renderPost(doc) {
+            const postData = doc.data();
+            const postId = doc.id;
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            postElement.setAttribute('data-post-id', postId);
+
+            const userLiked = postData.likes && postData.likes.includes(auth.currentUser.uid);
+            const likedClass = userLiked ? 'liked' : '';
+            const heartIconClass = userLiked ? 'fas' : 'far';
+            
+            const time = formatPostTime(postData.createdAt);
+
+            // --- UPDATED: INCLUDE BADGE HTML ---
+            const badgeHtml = getVerificationHtml(postData.isVerified, postData.badgeExpiry);
+            // ----------------------------------
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <img src="${postData.authorProfilePic || DEFAULT_PROFILE_PIC}" class="post-user-pic" onclick="loadUserProfile('${postData.authorUid}')">
+                    <div class="post-user-info">
+                        <h3 onclick="loadUserProfile('${postData.authorUid}')">${postData.authorName} ${badgeHtml}</h3>
+                        <p>${time}</p>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <p>${postData.text}</p>
+                    ${postData.imageUrl ? `<img src="${postData.imageUrl}" class="post-image">` : ''}
+                </div>
+                <div class="post-engagement">
+                    <button class="engagement-btn like-btn">
+                        <i class="${heartIconClass} fa-heart ${likedClass}"></i> 
+                        <span class="like-count">${formatCount(postData.likes ? postData.likes.length : 0)}</span>
+                    </button>
+                    <button class="engagement-btn comment-btn">
+                        <i class="far fa-comment"></i> <span class="comment-count">${formatCount(postData.commentsCount || 0)}</span>
+                    </button>
+                    <button class="engagement-btn share-btn">
+                        <i class="far fa-share-square"></i> শেয়ার
+                    </button>
+                </div>
+                <div class="comment-section">
+                    <div class="comments-list"></div>
+                    <form class="add-comment-form">
+                        <input type="text" class="comment-input" placeholder="কমেন্ট করুন..." required>
+                        <button type="submit" class="comment-submit-btn"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>`;
+            return postElement;
+        }
+
+        document.getElementById('create-post-btn').addEventListener('click', async () => {
+            const textInput = document.getElementById('post-text-input');
+            const fileInput = document.getElementById('post-image-input');
+            const btn = document.getElementById('create-post-btn');
+            
+            if(!textInput.value.trim() && !fileInput.files[0]) return;
+
+            btn.disabled = true;
+            btn.textContent = 'পোস্ট হচ্ছে...';
+
+            try {
+                let imgUrl = '';
+                if(fileInput.files[0]) imgUrl = await uploadToCloudinary(fileInput.files[0]);
+
+                await db.collection('posts').add({
+                    text: textInput.value,
+                    imageUrl: imgUrl,
+                    authorUid: auth.currentUser.uid,
+                    authorName: currentUserData.fullName,
+                    authorProfilePic: currentUserData.profilePicURL,
+                    
+                    // --- UPDATED: ADD BADGE DATA ---
+                    isVerified: currentUserData.isVerified || false,
+                    badgeExpiry: currentUserData.badgeExpiry || null,
+                    // -----------------------------
+
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    likes: [],
+                    commentsCount: 0,
+                    shareCount: 0
+                });
+                
+                // Update Activity Score (Dynamic Points)
+                updateActivityScore(auth.currentUser.uid, activityPoints.post, 'post');
+
+                textInput.value = '';
+                fileInput.value = '';
+                showToast('পোস্ট সফল হয়েছে!');
+                loadNewsfeedPosts();
+            } catch(e) {
+                console.error(e);
+                showToast('পোস্ট করতে সমস্যা হয়েছে');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'পোস্ট করুন';
+            }
+        });
+
+        // --- ACTIVITY TRACKING & LEADERBOARD LOGIC ---
+        
+        // 1. Track Session Time (Dynamic Points)
+        function startSessionTracking(uid) {
+            if (sessionTimer) clearInterval(sessionTimer);
+            sessionTimer = setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    // Use dynamic browse points
+                    updateActivityScore(uid, activityPoints.browse, 'browse');
+                }
+            }, 60000); // Every 60 seconds
+        }
+
+        function stopSessionTracking() {
+            if (sessionTimer) clearInterval(sessionTimer);
+        }
+
+        // 2. Universal Score Updater
+        async function updateActivityScore(uid, points, type) {
+            // Fallback if points somehow undefined
+            const scorePoints = points || 1;
+
+            const userRef = db.collection('users').doc(uid);
+            const leaderboardRef = db.collection('leaderboard').doc(uid);
+            
+            try {
+                const userDoc = await userRef.get();
+                const userData = userDoc.exists ? userDoc.data() : (currentUserData || {});
+                
+                // Use Transaction for safer updates
+                await db.runTransaction(async (t) => {
+                    const lbDoc = await t.get(leaderboardRef);
+                    
+                    let newData = {
+                        uid: uid,
+                        name: userData.fullName || "User",
+                        pic: userData.profilePicURL || DEFAULT_PROFILE_PIC,
+                        // Update badge data in leaderboard too for display
+                        isVerified: userData.isVerified || false,
+                        badgeExpiry: userData.badgeExpiry || null,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        score: firebase.firestore.FieldValue.increment(scorePoints)
+                    };
+
+                    if(type === 'post') newData.postsCount = firebase.firestore.FieldValue.increment(1);
+                    if(type === 'comment') newData.commentsCount = firebase.firestore.FieldValue.increment(1);
+                    if(type === 'like') newData.likesCount = firebase.firestore.FieldValue.increment(1);
+                    if(type === 'browse') newData.browseMinutes = firebase.firestore.FieldValue.increment(1);
+
+                    if (!lbDoc.exists) {
+                        t.set(leaderboardRef, { 
+                            ...newData, 
+                            score: scorePoints, // Initial score
+                            postsCount: type === 'post' ? 1 : 0,
+                            commentsCount: type === 'comment' ? 1 : 0,
+                            likesCount: type === 'like' ? 1 : 0,
+                            browseMinutes: type === 'browse' ? 1 : 0
+                        });
+                    } else {
+                        t.update(leaderboardRef, newData);
+                    }
+                });
+            } catch (e) {
+                console.log("Activity tracking error:", e);
+            }
+        }
+
+        // 3. Load Leaderboard
+        async function loadLeaderboard() {
+            const listContainer = document.getElementById('leaderboard-list');
+            listContainer.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
+            
+            // Check for Weekly Reward Reset
+            await checkAndDistributeRewards();
+
+            try {
+                const snapshot = await db.collection('leaderboard')
+                                       .orderBy('score', 'desc')
+                                       .limit(10)
+                                       .get();
+                
+                listContainer.innerHTML = '';
+                let rank = 1;
+                let myRankData = null;
+                
+                if (snapshot.empty) {
+                    listContainer.innerHTML = '<div style="text-align:center; padding:20px;">এখনও কেউ অ্যাক্টিভিটি শুরু করেনি!</div>';
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const isMe = data.uid === auth.currentUser.uid;
+                    if(isMe) myRankData = { rank: rank, score: data.score };
+
+                    let rankClass = '';
+                    let icon = '';
+                    if(rank === 1) { rankClass = 'rank-1'; icon = '<i class="fas fa-crown"></i>'; }
+                    else if(rank === 2) { rankClass = 'rank-2'; icon = '<i class="fas fa-medal"></i>'; }
+                    else if(rank === 3) { rankClass = 'rank-3'; icon = '<i class="fas fa-medal"></i>'; }
+
+                    // --- UPDATED: BADGE IN LEADERBOARD ---
+                    const badgeHtml = getVerificationHtml(data.isVerified, data.badgeExpiry);
+
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    if(isMe) item.style.backgroundColor = '#e3f2fd';
+                    
+                    item.innerHTML = `
+                        <div class="rank-num ${rankClass}">${icon || rank}</div>
+                        <div class="lb-user-info" onclick="loadUserProfile('${data.uid}')" style="cursor:pointer;">
+                            <img src="${data.pic || DEFAULT_PROFILE_PIC}" class="lb-pic">
+                            <div>
+                                <div style="font-weight:600; font-size:15px;">
+                                    ${data.name} ${badgeHtml}
+                                </div>
+                                <div class="lb-stats-mini">Posts: ${data.postsCount || 0} • Likes: ${data.likesCount || 0} • Min: ${data.browseMinutes || 0}</div>
+                            </div>
+                        </div>
+                        <div class="lb-score">${data.score} pts</div>
+                    `;
+                    listContainer.appendChild(item);
+                    rank++;
+                });
+
+                if(!myRankData) {
+                    const myDoc = await db.collection('leaderboard').doc(auth.currentUser.uid).get();
+                    if(myDoc.exists) {
+                        document.getElementById('my-score-display').textContent = `স্কোর: ${myDoc.data().score}`;
+                        document.getElementById('my-rank-display').textContent = 'Top 10 এর বাইরে';
+                    } else {
+                        document.getElementById('my-score-display').textContent = 'স্কোর: 0';
+                        document.getElementById('my-rank-display').textContent = '-';
+                    }
+                } else {
+                    document.getElementById('my-score-display').textContent = `স্কোর: ${myRankData.score}`;
+                    document.getElementById('my-rank-display').textContent = `#${myRankData.rank}`;
+                }
+
+            } catch (e) {
+                console.error(e);
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:red;">লোড করতে সমস্যা হয়েছে।</div>';
+            }
+        }
+
+        // 4. Weekly Reward Logic
+        async function checkAndDistributeRewards() {
+            const metaRef = db.collection('system').doc('leaderboard_meta');
+            const metaDoc = await metaRef.get();
+            const now = Date.now();
+            const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+            const REWARD_AMOUNT = 0.70;
+
+            let nextReset = now; 
+            
+            if (metaDoc.exists) {
+                nextReset = metaDoc.data().nextReset.toMillis();
+            } else {
+                await metaRef.set({ nextReset: firebase.firestore.Timestamp.fromMillis(now + ONE_WEEK_MS) });
+                return;
+            }
+
+            if (now > nextReset) {
+                console.log("Running Weekly Reward Distribution...");
+                const top3 = await db.collection('leaderboard').orderBy('score', 'desc').limit(3).get();
+                
+                if(!top3.empty) {
+                    const batch = db.batch();
+                    top3.forEach(doc => {
+                        const uid = doc.data().uid;
+                        const userRef = db.collection('users').doc(uid);
+                        batch.update(userRef, { 
+                            walletBalance: firebase.firestore.FieldValue.increment(REWARD_AMOUNT) 
+                        });
+                        const notifRef = db.collection('users').doc(uid).collection('notifications').doc();
+                        batch.set(notifRef, {
+                            type: 'reward',
+                            text: 'অভিনন্দন! আপনি সাপ্তাহিক লিডারবোর্ডে সেরা হয়ে $0.70 জিতেছেন!',
+                            read: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+
+                    const activeUsers = await db.collection('leaderboard').limit(50).get();
+                    activeUsers.forEach(doc => {
+                        batch.update(doc.ref, { 
+                            score: 0, postsCount: 0, likesCount: 0, commentsCount: 0, browseMinutes: 0 
+                        });
+                    });
+
+                    batch.update(metaRef, { nextReset: firebase.firestore.Timestamp.fromMillis(now + ONE_WEEK_MS) });
+                    await batch.commit();
+                    showToast('নতুন সপ্তাহ শুরু হয়েছে! গত সপ্তাহের বিজয়ীদের পুরস্কৃত করা হয়েছে।');
+                }
+            }
+        }
+        
+        // 5. Load Wallet Logic
+        async function loadWallet() {
+            const balanceEl = document.getElementById('wallet-balance');
+            const transList = document.getElementById('transaction-list');
+            
+            const userDoc = await db.collection('users').doc(auth.currentUser.uid).get();
+            const balance = userDoc.data().walletBalance || 0.00;
+            balanceEl.textContent = `$${balance.toFixed(2)}`;
+        }
+
+        // --- PROFILE LOGIC ---
+        async function loadUserProfile(targetUid) {
+            navigateTo('profile-page');
+            const isSelf = targetUid === auth.currentUser.uid;
+            
+            // Reset UI
+            document.getElementById('profile-name').innerHTML = 'Loading...';
+            document.getElementById('profile-bio').textContent = '';
+            document.getElementById('profile-pic-large').src = DEFAULT_PROFILE_PIC;
+            document.getElementById('profile-cover-photo').style.backgroundImage = 'none';
+            document.getElementById('profile-cover-photo').classList.remove('editable');
+
+            // Controls
+            document.getElementById('edit-bio-trigger').style.display = isSelf ? 'inline-block' : 'none';
+            document.getElementById('follow-btn').style.display = isSelf ? 'none' : 'inline-block';
+            document.getElementById('msg-btn').style.display = isSelf ? 'none' : 'inline-block';
+
+            document.getElementById('profile-pic-large').style.pointerEvents = isSelf ? 'auto' : 'none';
+
+            try {
+                let data;
+                if (isSelf && currentUserData.uid) {
+                    data = currentUserData;
+                } else {
+                    const doc = await db.collection('users').doc(targetUid).get();
+                    if (!doc.exists) return showToast('User not found');
+                    data = doc.data();
+                }
+
+                // --- UPDATED: BADGE IN PROFILE NAME ---
+                const badgeHtml = getVerificationHtml(data.isVerified, data.badgeExpiry);
+                document.getElementById('profile-name').innerHTML = `${data.fullName} ${badgeHtml}`;
+                
+                document.getElementById('profile-bio').textContent = data.bio || 'কোনো বায়ো নেই';
+                document.getElementById('profile-pic-large').src = data.profilePicURL || DEFAULT_PROFILE_PIC;
+                document.getElementById('profile-cover-photo').style.backgroundImage = data.coverPhotoURL ? `url(${data.coverPhotoURL})` : 'none';
+                
+                document.getElementById('following-count').textContent = formatCount(data.followingCount || 0);
+                document.getElementById('follower-count').textContent = formatCount(data.followerCount || 0);
+                document.getElementById('like-count').textContent = formatCount(data.totalLikes || 0);
+
+                loadUserPosts(targetUid);
+
+                if (!isSelf) {
+                    const followBtn = document.getElementById('follow-btn');
+                    const myFollowings = await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).get();
+                    
+                    if (myFollowings.exists) {
+                        followBtn.textContent = 'Unfollow';
+                        followBtn.classList.add('btn-outline');
+                    } else {
+                        followBtn.textContent = 'Follow';
+                        followBtn.classList.remove('btn-outline');
+                    }
+
+                    followBtn.onclick = async () => {
+                        if (followBtn.textContent === 'Follow') {
+                            await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).set({});
+                            await db.collection('users').doc(auth.currentUser.uid).update({followingCount: firebase.firestore.FieldValue.increment(1)});
+                            await db.collection('users').doc(targetUid).collection('followers').doc(auth.currentUser.uid).set({});
+                            await db.collection('users').doc(targetUid).update({followerCount: firebase.firestore.FieldValue.increment(1)});
+                            sendNotification(targetUid, 'follow');
+                            followBtn.textContent = 'Unfollow';
+                            followBtn.classList.add('btn-outline');
+                        } else {
+                            await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).delete();
+                            await db.collection('users').doc(auth.currentUser.uid).update({followingCount: firebase.firestore.FieldValue.increment(-1)});
+                            await db.collection('users').doc(targetUid).collection('followers').doc(auth.currentUser.uid).delete();
+                            await db.collection('users').doc(targetUid).update({followerCount: firebase.firestore.FieldValue.increment(-1)});
+                            followBtn.textContent = 'Follow';
+                            followBtn.classList.remove('btn-outline');
+                        }
+                        const updatedDoc = await db.collection('users').doc(targetUid).get();
+                        document.getElementById('follower-count').textContent = formatCount(updatedDoc.data().followerCount || 0);
+                    };
+
+                    // Pass verification status to chat
+                    document.getElementById('msg-btn').onclick = () => {
+                        openChat(targetUid, data.fullName, data.profilePicURL, data.isVerified, data.badgeExpiry);
+                    };
+                } else {
+                    // SELF INTERACTIONS
+                    document.getElementById('edit-bio-trigger').onclick = () => {
+                        document.getElementById('new-bio-input').value = data.bio || '';
+                        openModal('bio-modal');
+                    };
+
+                    const picInput = document.getElementById('profile-pic-input');
+                    document.getElementById('profile-pic-large').onclick = () => picInput.click();
+                    
+                    picInput.onchange = async (e) => {
+                        if(e.target.files[0]) {
+                            document.getElementById('pic-spinner').style.display = 'block';
+                            try {
+                                const url = await uploadToCloudinary(e.target.files[0]);
+                                await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url });
+                                currentUserData.profilePicURL = url;
+                                document.getElementById('profile-pic-large').src = url;
+                                document.getElementById('header-profile-pic').src = url;
+                                showToast('প্রোফাইল ছবি আপডেট হয়েছে!');
+                            } catch(err) { showToast('আপলোড ব্যর্থ হয়েছে'); }
+                            document.getElementById('pic-spinner').style.display = 'none';
+                        }
+                    };
+
+                    const coverInput = document.getElementById('cover-photo-input');
+                    const coverDiv = document.getElementById('profile-cover-photo');
+                    coverDiv.classList.add('editable');
+                    coverDiv.onclick = (e) => {
+                         if(e.target === coverDiv || e.target.classList.contains('editable')) {
+                             coverInput.click();
+                         }
+                    };
+                    
+                    coverInput.onchange = async (e) => {
+                         if(e.target.files[0]) {
+                            document.getElementById('cover-spinner').style.display = 'block';
+                            try {
+                                const url = await uploadToCloudinary(e.target.files[0]);
+                                await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url });
+                                document.getElementById('profile-cover-photo').style.backgroundImage = `url(${url})`;
+                                showToast('কভার ফটো আপডেট হয়েছে!');
+                            } catch(err) { showToast('আপলোড ব্যর্থ হয়েছে'); }
+                            document.getElementById('cover-spinner').style.display = 'none';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadNewsfeedPosts() {
+            const container = document.getElementById('newsfeed-container');
+            Array.from(container.children).forEach(child => {
+                if (!child.classList.contains('create-post')) child.remove();
+            });
+
+            const snapshot = await db.collection('posts').orderBy('createdAt', 'desc').limit(10).get();
+            snapshot.forEach(doc => container.appendChild(renderPost(doc)));
+        }
+
+        async function loadUserPosts(uid) {
+            const container = document.getElementById('user-posts-container');
+            container.innerHTML = '<h3 style="text-align: center; color: var(--text-light); margin-bottom: 20px; font-size:16px;">পোস্টসমূহ</h3>';
+            const snapshot = await db.collection('posts').where('authorUid', '==', uid).orderBy('createdAt', 'desc').limit(10).get();
+            snapshot.forEach(doc => container.appendChild(renderPost(doc)));
+        }
+
+        // --- INBOX, CHAT, SEARCH, UTILS ---
+        document.getElementById('inbox-btn').addEventListener('click', async () => {
+            navigateTo('inbox-page');
+            const list = document.getElementById('inbox-list');
+            list.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
+            const snapshot = await db.collection('users').doc(auth.currentUser.uid).collection('following').get();
+            list.innerHTML = '';
+            if(snapshot.empty) {
+                list.innerHTML = '<div style="text-align:center; padding:20px;">আপনি কাউকে ফলো করছেন না।</div>';
+                return;
+            }
+            for (let doc of snapshot.docs) {
+                const friendId = doc.id;
+                const userDoc = await db.collection('users').doc(friendId).get();
+                if(userDoc.exists) {
+                    const u = userDoc.data();
+                    // --- UPDATED: BADGE IN INBOX ---
+                    const badgeHtml = getVerificationHtml(u.isVerified, u.badgeExpiry);
+
+                    const item = document.createElement('div');
+                    item.className = 'inbox-item';
+                    item.innerHTML = `
+                        <img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" style="width:50px; height:50px; border-radius:50%; margin-right:15px;">
+                        <div>
+                            <h4 style="font-size:16px;">${u.fullName} ${badgeHtml}</h4>
+                            <p style="color:#777; font-size:12px;">চ্যাট করতে ট্যাপ করুন</p>
+                        </div>
+                    `;
+                    item.onclick = () => openChat(friendId, u.fullName, u.profilePicURL, u.isVerified, u.badgeExpiry);
+                    list.appendChild(item);
+                }
+            }
+        });
+
+        // Updated OpenChat to accept badge info
+        function openChat(targetUid, name, pic, isVerified, badgeExpiry) {
+            document.getElementById('chat-page').classList.remove('d-none');
+            history.pushState({ page: 'chat-page' }, "", "#chat");
+            
+            // --- UPDATED: BADGE IN CHAT HEADER ---
+            const badgeHtml = getVerificationHtml(isVerified, badgeExpiry);
+            document.getElementById('chat-header-name').innerHTML = `${name} ${badgeHtml}`;
+            
+            document.getElementById('chat-header-pic').src = pic || DEFAULT_PROFILE_PIC;
+            document.getElementById('chat-messages').innerHTML = '';
+            const chatId = [auth.currentUser.uid, targetUid].sort().join('_');
+            if(activeChatUnsubscribe) activeChatUnsubscribe();
+            activeChatUnsubscribe = db.collection('chats').doc(chatId).collection('messages').orderBy('createdAt', 'asc').onSnapshot(snapshot => {
+                    const container = document.getElementById('chat-messages');
+                    container.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        const isMe = msg.senderUid === auth.currentUser.uid;
+                        const div = document.createElement('div');
+                        div.className = `message-bubble ${isMe ? 'sent' : 'received'}`;
+                        div.innerHTML = `${msg.text} ${msg.imageUrl ? `<br><img src="${msg.imageUrl}" class="message-img">` : ''}<span class="message-time">${formatPostTime(msg.createdAt)}</span>`;
+                        container.appendChild(div);
+                    });
+                    container.scrollTop = container.scrollHeight;
+                });
+            document.getElementById('chat-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                if(!text) return;
+                await db.collection('chats').doc(chatId).collection('messages').add({
+                    text: text, imageUrl: null, senderUid: auth.currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                input.value = '';
+            };
+        }
+
+        document.getElementById('back-from-chat').addEventListener('click', () => history.back());
+        document.getElementById('search-btn').addEventListener('click', () => { document.getElementById('search-page').classList.remove('d-none'); document.getElementById('global-search-input').focus(); history.pushState({page: 'search-page'}, "", "#search"); });
+        document.getElementById('close-search').addEventListener('click', () => history.back());
+        
+        document.getElementById('global-search-input').addEventListener('input', async (e) => {
+            const val = e.target.value.trim();
+            const resContainer = document.getElementById('search-results');
+            resContainer.innerHTML = '';
+            if(val.length < 2) return;
+            
+            const snapshot = await db.collection('users').where('fullName', '>=', val).where('fullName', '<=', val + '\uf8ff').limit(5).get();
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                // --- UPDATED: BADGE IN SEARCH ---
+                const badgeHtml = getVerificationHtml(u.isVerified, u.badgeExpiry);
+                
+                const div = document.createElement('div'); div.className = 'search-result-item';
+                div.innerHTML = `<img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" class="search-user-pic"><span>${u.fullName} ${badgeHtml}</span>`;
+                div.onclick = () => loadUserProfile(u.uid);
+                resContainer.appendChild(div);
+            });
+        });
+
+        // --- GLOBAL ACTIONS (OPTIMISTIC UI) ---
+        document.body.addEventListener('click', async function(e) {
+             const likeButton = e.target.closest('.like-btn');
+             if (likeButton) {
+                const postElement = likeButton.closest('.post');
+                const postId = postElement.dataset.postId;
+                const heart = likeButton.querySelector('.fa-heart');
+                const countSpan = likeButton.querySelector('.like-count');
+                let currentCount = parseInt(countSpan.textContent);
+                const isLiked = heart.classList.contains('liked');
+
+                // OPTIMISTIC UPDATE
+                if(isLiked) {
+                    heart.classList.remove('liked', 'fas'); heart.classList.add('far');
+                    countSpan.textContent = currentCount - 1;
+                } else {
+                    heart.classList.add('liked', 'fas'); heart.classList.remove('far');
+                    countSpan.textContent = currentCount + 1;
+                }
+
+                try {
+                    const postRef = db.collection('posts').doc(postId);
+                    const postDoc = await postRef.get();
+                    const authorUid = postDoc.data().authorUid;
+                    const authorRef = db.collection('users').doc(authorUid);
+                    
+                    await db.runTransaction(async (transaction) => {
+                        const pd = await transaction.get(postRef);
+                        const likes = pd.data().likes || [];
+                        if (likes.includes(auth.currentUser.uid)) {
+                            transaction.update(postRef, { likes: firebase.firestore.FieldValue.arrayRemove(auth.currentUser.uid) });
+                            transaction.update(authorRef, { totalLikes: firebase.firestore.FieldValue.increment(-1) });
+                        } else {
+                            transaction.update(postRef, { likes: firebase.firestore.FieldValue.arrayUnion(auth.currentUser.uid) });
+                            transaction.update(authorRef, { totalLikes: firebase.firestore.FieldValue.increment(1) });
+                            if(authorUid !== auth.currentUser.uid) sendNotification(authorUid, 'like', postId);
+                        }
+                    });
+
+                    // UPDATED: Dynamic Score for like
+                    if(!isLiked) updateActivityScore(auth.currentUser.uid, activityPoints.like, 'like');
+
+                } catch (err) {
+                    console.error("Like failed: ", err);
+                    // ROLLBACK
+                    if(isLiked) {
+                        heart.classList.add('liked', 'fas'); heart.classList.remove('far');
+                        countSpan.textContent = currentCount;
+                    } else {
+                        heart.classList.remove('liked', 'fas'); heart.classList.add('far');
+                        countSpan.textContent = currentCount;
+                    }
+                    showToast('Action failed, reverted.');
+                }
+             }
+
+             const commentButton = e.target.closest('.comment-btn');
+             if (commentButton) {
+                 const section = commentButton.closest('.post').querySelector('.comment-section');
+                 section.style.display = section.style.display === 'block' ? 'none' : 'block';
+                 if(section.style.display === 'block') loadComments(commentButton.closest('.post').dataset.postId, section.querySelector('.comments-list'));
+             }
+             
+             const shareButton = e.target.closest('.share-btn');
+             if (shareButton) {
+                 const postId = shareButton.closest('.post').dataset.postId;
+                 navigator.clipboard.writeText(postId).then(() => showToast("পোস্ট আইডি কপি হয়েছে!"));
+             }
+        });
+
+        document.body.addEventListener('submit', async function(e){
+            if(e.target.classList.contains('add-comment-form')) {
+                e.preventDefault();
+                const form = e.target;
+                const input = form.querySelector('.comment-input');
+                const text = input.value.trim();
+                const postId = form.closest('.post').dataset.postId;
+                
+                if(!text) return;
+
+                const list = form.closest('.post').querySelector('.comments-list');
+                // OPTIMISTIC APPEND
+                const fakeDiv = document.createElement('div');
+                fakeDiv.className = 'comment';
+                fakeDiv.style.opacity = '0.7';
+                
+                // For optimistic UI, we use current user data
+                const myBadgeHtml = getVerificationHtml(currentUserData.isVerified, currentUserData.badgeExpiry);
+                
+                fakeDiv.innerHTML = `<img src="${currentUserData.profilePicURL}" class="comment-user-pic"><div class="comment-body"><strong>${currentUserData.fullName} ${myBadgeHtml}</strong><span class="comment-text">${text}</span></div>`;
+                list.appendChild(fakeDiv);
+                input.value = '';
+
+                try {
+                    const postRef = db.collection('posts').doc(postId);
+                    const postDoc = await postRef.get();
+                    await postRef.collection('comments').add({
+                        text, 
+                        authorUid: auth.currentUser.uid, 
+                        authorName: currentUserData.fullName,
+                        authorProfilePic: currentUserData.profilePicURL,
+                        // Save verification snapshot for comments
+                        isVerified: currentUserData.isVerified || false,
+                        badgeExpiry: currentUserData.badgeExpiry || null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
+                    sendNotification(postDoc.data().authorUid, 'comment', postId);
+                    
+                    // UPDATED: Dynamic Score for comment
+                    updateActivityScore(auth.currentUser.uid, activityPoints.comment, 'comment');
+
+                    // Reload to get real ID and allow edit/delete
+                    loadComments(postId, list);
+                } catch (err) {
+                    fakeDiv.remove();
+                    input.value = text; // Restore text
+                    showToast('কমেন্ট ব্যর্থ হয়েছে');
+                }
+            }
+        });
+
+        async function loadComments(postId, container) {
+            container.innerHTML = '';
+            const s = await db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'asc').get();
+            s.forEach(doc => {
+                const d = doc.data();
+                const div = document.createElement('div'); div.className = 'comment';
+                const isMy = d.authorUid === auth.currentUser.uid;
+                
+                // --- UPDATED: BADGE IN COMMENTS ---
+                const badgeHtml = getVerificationHtml(d.isVerified, d.badgeExpiry);
+
+                div.innerHTML = `<img src="${d.authorProfilePic}" class="comment-user-pic"><div class="comment-body"><strong>${d.authorName} ${badgeHtml}</strong><span class="comment-text">${d.text}</span></div>${isMy ? `<div class="comment-actions"><button class="comment-action-btn edit-cmt-btn"><i class="fas fa-edit"></i></button><button class="comment-action-btn del-cmt-btn"><i class="fas fa-trash"></i></button></div>` : ''}`;
+                if(isMy) {
+                    div.querySelector('.del-cmt-btn').onclick = async () => { if(confirm('Delete?')) { await db.collection('posts').doc(postId).collection('comments').doc(doc.id).delete(); await db.collection('posts').doc(postId).update({ commentsCount: firebase.firestore.FieldValue.increment(-1) }); loadComments(postId, container); } };
+                    div.querySelector('.edit-cmt-btn').onclick = () => openEditModal(d.text, doc.id, 'comments', postId);
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function formatCount(num) { if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'; if (num >= 1000) return (num / 1000).toFixed(1) + 'K'; return num; }
+        async function uploadToCloudinary(file) {
+            const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+            const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await response.json(); return data.secure_url;
+        }
+        async function logout() { stopSessionTracking(); await auth.signOut(); navigateTo('login-page'); }
+        document.getElementById('nav-logout').addEventListener('click', logout);
+
+        // MODALS
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        window.closeModal = closeModal;
+
+        document.getElementById('open-name-modal').addEventListener('click', () => openModal('name-modal'));
+        document.getElementById('save-name-btn').addEventListener('click', async () => {
+            const newName = document.getElementById('new-fullname-input').value;
+            if(newName.trim()) {
+                await db.collection('users').doc(auth.currentUser.uid).update({ fullName: newName });
+                currentUserData.fullName = newName; closeModal('name-modal'); showToast('নাম পরিবর্তন হয়েছে!');
+            }
+        });
+
+        // Bio Modal Save
+        document.getElementById('save-bio-btn').addEventListener('click', async () => {
+            const bio = document.getElementById('new-bio-input').value;
+            await db.collection('users').doc(auth.currentUser.uid).update({ bio: bio });
+            currentUserData.bio = bio;
+            document.getElementById('profile-bio').textContent = bio;
+            closeModal('bio-modal');
+            showToast('বায়ো আপডেট হয়েছে');
+        });
+
+        document.getElementById('open-password-modal').addEventListener('click', () => openModal('password-modal'));
+        document.getElementById('save-pass-btn').addEventListener('click', async () => {
+            const currentPass = document.getElementById('modal-current-pass').value;
+            const newPass = document.getElementById('modal-new-pass').value;
+            if(currentPass && newPass) {
+                const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, currentPass);
+                try { await auth.currentUser.reauthenticateWithCredential(cred); await auth.currentUser.updatePassword(newPass); closeModal('password-modal'); showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); } catch(e) { showToast('ত্রুটি: ' + e.message); }
+            }
+        });
+
+        function openEditModal(text, docId, type, parentId) {
+            document.getElementById('edit-text-input').value = text; document.getElementById('edit-target-id').value = docId; document.getElementById('edit-target-collection').value = type; document.getElementById('edit-parent-id').value = parentId; openModal('edit-text-modal');
+        }
+        document.getElementById('save-edit-btn').addEventListener('click', async () => {
+            const text = document.getElementById('edit-text-input').value; const docId = document.getElementById('edit-target-id').value; const type = document.getElementById('edit-target-collection').value; const parentId = document.getElementById('edit-parent-id').value;
+            if(text.trim()) {
+                if(type === 'comments') {
+                    await db.collection('posts').doc(parentId).collection('comments').doc(docId).update({ text: text });
+                    loadComments(parentId, document.querySelector(`.post[data-post-id="${parentId}"]`).querySelector('.comments-list'));
+                }
+                closeModal('edit-text-modal');
+                showToast('আপডেট হয়েছে!');
+            }
+        });
+
+        // New Navigation Logic for Wallet and Leaderboard
+        document.getElementById('go-to-wallet').addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            navigateTo('wallet-page'); 
+            loadWallet();
+        });
+        
+        document.getElementById('go-to-leaderboard').addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateTo('leaderboard-page');
+            loadLeaderboard();
+        });
+        
+        document.getElementById('back-from-leaderboard').addEventListener('click', () => history.back());
+
+        // Auth logic
+        document.getElementById('go-to-login').addEventListener('click', (e) => { e.preventDefault(); navigateTo('login-page', false); });
+        document.getElementById('go-to-signup').addEventListener('click', (e) => { e.preventDefault(); navigateTo('signup-page', false); });
+        document.getElementById('header-logo-btn').addEventListener('click', () => navigateTo('home-page'));
+        document.getElementById('nav-profile').addEventListener('click', (e) => { e.preventDefault(); loadUserProfile(auth.currentUser.uid); });
+        document.getElementById('nav-settings').addEventListener('click', (e) => { e.preventDefault(); navigateTo('settings-page'); });
+        document.getElementById('header-profile-pic').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('profile-dropdown').classList.toggle('show'); document.getElementById('notification-dropdown').classList.remove('show'); });
+        document.getElementById('notif-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('notification-dropdown').classList.toggle('show'); document.getElementById('profile-dropdown').classList.remove('show'); });
+        window.addEventListener('click', () => document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.remove('show')));
+        document.getElementById('add-image-btn').addEventListener('click', () => document.getElementById('post-image-input').click());
+        
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); try { await auth.signInWithEmailAndPassword(document.getElementById('login-email').value, document.getElementById('login-password').value); } catch(err) { showToast(err.message); }
+        });
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(document.getElementById('email').value, document.getElementById('password').value);
+                let picUrl = DEFAULT_PROFILE_PIC, coverUrl = '';
+                if(document.getElementById('profile-pic-signup').files[0]) picUrl = await uploadToCloudinary(document.getElementById('profile-pic-signup').files[0]);
+                if(document.getElementById('cover-photo-signup').files[0]) coverUrl = await uploadToCloudinary(document.getElementById('cover-photo-signup').files[0]);
+                await db.collection('users').doc(cred.user.uid).set({
+                    uid: cred.user.uid, fullName: document.getElementById('fullname').value, email: document.getElementById('email').value, profilePicURL: picUrl, coverPhotoURL: coverUrl, followingCount: 0, followerCount: 0, totalLikes: 0, bio: '', walletBalance: 0.00
+                });
+                showToast('সফল!');
+            } catch(err) { showToast(err.message); }
+        });
+    </script>
+</body>
+</html>
