@@ -2655,6 +2655,20 @@
             }
             
             // Delete Post
+             if(e.target.closest('.edit-post-opt')) {
+                const postEl = e.target.closest('.post');
+                const postId = postEl.dataset.postId;
+                // পোস্টের বর্তমান টেক্সট নেওয়া
+                const currentText = postEl.querySelector('.post-content p').innerText;
+
+                // মডালে ডাটা সেট করা
+                document.getElementById('edit-target-id').value = postId;
+                document.getElementById('edit-target-collection').value = 'posts'; // কালেকশন নাম 'posts' সেট করা
+                document.getElementById('edit-text-input').value = currentText;
+                
+                // মডাল ওপেন করা
+                openModal('edit-text-modal');
+            }
             if(e.target.closest('.delete-post-opt')) {
                 if(confirm("আপনি কি এই পোস্টটি ডিলিট করতে চান?")) {
                     const postEl = e.target.closest('.post');
@@ -2880,22 +2894,41 @@
             if(currentPass && newPass) { try { const cred = firebase.auth.EmailAuthProvider.credential(auth.currentUser.email, currentPass); await auth.currentUser.reauthenticateWithCredential(cred); await auth.currentUser.updatePassword(newPass); closeModal('password-modal'); showToast('পাসওয়ার্ড সফলভাবে পরিবর্তন হয়েছে!'); } catch(e) { showToast('ত্রুটি: ' + e.message); } }
         });
         
-        // Feature 2: Edit/Delete Message Logic
+        // Feature 2: Edit/Delete Message & Post Logic (UPDATED)
         document.getElementById('save-edit-btn').addEventListener('click', async () => {
             const val = document.getElementById('edit-text-input').value;
             const id = document.getElementById('edit-target-id').value;
-            const col = document.getElementById('edit-target-collection').value; // 'messages'
-            const parentId = document.getElementById('edit-parent-id').value; // chatId
+            const col = document.getElementById('edit-target-collection').value; 
+            const parentId = document.getElementById('edit-parent-id').value; 
             
-            if(col === 'messages' && val.trim()) {
-                 try {
+            if(!val.trim()) return;
+
+            try {
+                // ১. যদি এটি পোস্ট হয়
+                if(col === 'posts') {
+                    await db.collection('posts').doc(id).update({
+                        text: val,
+                        isEdited: true
+                    });
+                    showToast('পোস্ট আপডেট হয়েছে!');
+                    closeModal('edit-text-modal');
+                    
+                    // পেজ রিফ্রেশ না করে আপডেট দেখানোর জন্য
+                    if(!document.getElementById('home-page').classList.contains('d-none')) loadNewsfeedPosts();
+                    if(!document.getElementById('profile-page').classList.contains('d-none')) loadUserPosts(auth.currentUser.uid);
+                }
+                // ২. যদি এটি চ্যাট মেসেজ হয়
+                else if(col === 'messages') {
                      await db.collection('chats').doc(parentId).collection('messages').doc(id).update({
                          text: val,
                          isEdited: true
                      });
-                     closeModal('edit-text-modal');
                      showToast('মেসেজ এডিট হয়েছে');
-                 } catch(e) { showToast('সমস্যা হয়েছে'); }
+                     closeModal('edit-text-modal');
+                }
+            } catch(e) { 
+                console.error(e);
+                showToast('সমস্যা হয়েছে: ' + e.message); 
             }
         });
 
