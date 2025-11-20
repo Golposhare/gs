@@ -2887,16 +2887,42 @@
         async function loadComments(postId, container) {
             container.innerHTML = '';
             const s = await db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'asc').get();
+            
+            // ১. সব কমেন্ট একটি তালিকায় নেওয়া
+            let allComments = [];
             s.forEach(doc => {
-                const d = doc.data();
+                allComments.push({ id: doc.id, ...doc.data() });
+            });
+
+            // ২. যেসব কমেন্ট ডিলিট (হাইড) করা হয়েছে বা যাদের প্যারেন্ট হাইড, তাদের তালিকা তৈরি
+            const hiddenCommentIds = new Set();
+            
+            // প্রথম ধাপ: যেগুলো সরাসরি ডিলিট করা হয়েছে
+            allComments.forEach(c => {
+                if (c.isDeleted === true) {
+                    hiddenCommentIds.add(c.id);
+                }
+            });
+
+            // দ্বিতীয় ধাপ: যদি প্যারেন্ট হাইড থাকে, তবে রিপ্লাইও হাইড হবে
+            allComments.forEach(c => {
+                if (c.replyToId && hiddenCommentIds.has(c.replyToId)) {
+                    hiddenCommentIds.add(c.id);
+                }
+            });
+
+            // ৩. রেন্ডারিং (যাদের আইডি hidden লিস্টে নেই, শুধু তারাই দেখাবে)
+            allComments.forEach(d => {
+                // যদি কমেন্টটি হাইড লিস্টে থাকে, তবে এটি দেখাব না
+                if (hiddenCommentIds.has(d.id)) return;
+
                 const div = document.createElement('div'); 
                 div.className = `comment ${d.replyToId ? 'reply-indent' : ''}`;
-                div.setAttribute('data-comment-id', doc.id);
+                div.setAttribute('data-comment-id', d.id);
                 div.setAttribute('data-author-name', d.authorName);
                 
                 const isMy = d.authorUid === auth.currentUser.uid;
                 const badgeHtml = getVerificationHtml(d.isVerified, d.badgeExpiry);
-                // Process text for links/mentions
                 const processedComment = processText(d.text);
                 
                 div.innerHTML = `
@@ -2910,7 +2936,35 @@
                         ${isMy ? `<button class="comment-action-btn del-cmt-btn"><i class="fas fa-trash"></i></button>` : ''}
                     </div>`;
                     
-                if(isMy) div.querySelector('.del-cmt-btn').onclick = async () => { if(confirm('Delete?')) { await db.collection('posts').doc(postId).collection('comments').doc(doc.id).delete(); await db.collection('posts').doc(postId).update({ commentsCount: firebase.firestore.FieldValue.increment(-1) }); loadComments(postId, container); } };
+                // --- হাইড (Soft Delete) লজিক ---
+                if(isMy) {
+                    div.querySelector('.del-cmt-btn').onclick = async () => { 
+                        if(!confirm('আপনি কি এই কমেন্টটি মুছে ফেলতে চান?')) return;
+                        
+                        const btn = div.querySelector('.del-cmt-btn');
+                        btn.disabled = true;
+
+                        try {
+                            // ডাটা ডিলিট না করে isDeleted: true সেট করা হচ্ছে
+                            await db.collection('posts').doc(postId).collection('comments').doc(d.id).update({
+                                isDeleted: true
+                            });
+
+                            // কমেন্ট কাউন্ট কমানো
+                            await db.collection('posts').doc(postId).update({ 
+                                commentsCount: firebase.firestore.FieldValue.increment(-1) 
+                            });
+
+                            showToast('কমেন্ট মুছে ফেলা হয়েছে');
+                            loadComments(postId, container); // রিফ্রেশ করলে এটি আর দেখাবে না
+
+                        } catch(e) {
+                            console.error(e);
+                            showToast('সমস্যা হয়েছে');
+                            btn.disabled = false;
+                        }
+                    };
+                }
                 container.appendChild(div);
             });
         }
