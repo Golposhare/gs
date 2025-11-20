@@ -2544,15 +2544,33 @@
         async function loadUserProfile(targetUid) {
             navigateTo('profile-page');
             const isSelf = targetUid === auth.currentUser.uid;
+            
+            // এলিমেন্টগুলো সিলেক্ট করা
+            const profilePicEl = document.getElementById('profile-pic-large');
+            const coverPhotoEl = document.getElementById('profile-cover-photo');
+            const editBioBtn = document.getElementById('edit-bio-trigger');
+            const followBtn = document.getElementById('follow-btn');
+            const msgBtn = document.getElementById('msg-btn');
+
+            // রিসেট (লোডিং স্টেট)
             document.getElementById('profile-name').innerHTML = 'Loading...';
             document.getElementById('profile-bio').textContent = '';
-            document.getElementById('profile-pic-large').src = DEFAULT_PROFILE_PIC;
-            document.getElementById('profile-cover-photo').style.backgroundImage = 'none';
-            document.getElementById('edit-bio-trigger').style.display = isSelf ? 'inline-block' : 'none';
+            profilePicEl.src = DEFAULT_PROFILE_PIC;
+            coverPhotoEl.style.backgroundImage = 'none';
+            
+            // --- BUG FIX: আগের ইভেন্ট লিসেনার পরিষ্কার করা ---
+            // অন্য কারো প্রোফাইলে গেলে যাতে ক্লিক কাজ না করে, তাই নাল (null) করে দেওয়া হচ্ছে
+            profilePicEl.onclick = null;
+            coverPhotoEl.onclick = null;
+            profilePicEl.style.cursor = 'default';
+            coverPhotoEl.style.cursor = 'default';
+            // ------------------------------------------------
+
+            editBioBtn.style.display = isSelf ? 'inline-block' : 'none';
             
             // Feature 5: Always show Message Button for others
-            document.getElementById('msg-btn').style.display = isSelf ? 'none' : 'inline-block';
-            document.getElementById('follow-btn').style.display = isSelf ? 'none' : 'inline-block';
+            msgBtn.style.display = isSelf ? 'none' : 'inline-block';
+            followBtn.style.display = isSelf ? 'none' : 'inline-block';
 
             try {
                 let data;
@@ -2562,23 +2580,27 @@
                     if (!doc.exists) return showToast('User not found');
                     data = doc.data();
                 }
+                
+                // ব্যাজ এবং রোল হ্যান্ডলিং
                 const badgeHtml = getVerificationHtml(data.isVerified, data.badgeExpiry);
-                const roleHtml = getRoleHtml(data.role);
+                // getRoleHtml ফাংশনটি যদি আপনার কোডে থাকে তবেই দেখাবে, না থাকলে এরর দেবে না
+                const roleHtml = (typeof getRoleHtml === 'function') ? getRoleHtml(data.role) : ''; 
                 
                 document.getElementById('profile-name').innerHTML = `${data.fullName} ${badgeHtml} ${roleHtml}`;
                 document.getElementById('profile-bio').textContent = data.bio || 'কোনো বায়ো নেই';
-                document.getElementById('profile-pic-large').src = data.profilePicURL || DEFAULT_PROFILE_PIC;
-                document.getElementById('profile-cover-photo').style.backgroundImage = data.coverPhotoURL ? `url(${data.coverPhotoURL})` : 'none';
+                profilePicEl.src = data.profilePicURL || DEFAULT_PROFILE_PIC;
+                coverPhotoEl.style.backgroundImage = data.coverPhotoURL ? `url(${data.coverPhotoURL})` : 'none';
                 document.getElementById('following-count').textContent = formatCount(data.followingCount || 0);
                 document.getElementById('follower-count').textContent = formatCount(data.followerCount || 0);
                 document.getElementById('like-count').textContent = formatCount(data.totalLikes || 0);
                 loadUserPosts(targetUid);
 
                 if (!isSelf) {
-                    const followBtn = document.getElementById('follow-btn');
+                    // --- অন্যের প্রোফাইল ভিউ লজিক ---
                     const myFollowings = await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).get();
                     if (myFollowings.exists) { followBtn.textContent = 'Unfollow'; followBtn.classList.add('btn-outline'); } 
                     else { followBtn.textContent = 'Follow'; followBtn.classList.remove('btn-outline'); }
+                    
                     followBtn.onclick = async () => {
                         if (followBtn.textContent === 'Follow') {
                             await db.collection('users').doc(auth.currentUser.uid).collection('following').doc(targetUid).set({});
@@ -2597,24 +2619,53 @@
                         const updatedDoc = await db.collection('users').doc(targetUid).get();
                         document.getElementById('follower-count').textContent = formatCount(updatedDoc.data().followerCount || 0);
                     };
-                    // Feature 5: Direct Message logic (no follow check required)
-                    document.getElementById('msg-btn').onclick = () => openChat(targetUid, data.fullName, data.profilePicURL, data.isVerified, data.badgeExpiry);
+                    msgBtn.onclick = () => openChat(targetUid, data.fullName, data.profilePicURL, data.isVerified, data.badgeExpiry);
+                
                 } else {
-                    document.getElementById('edit-bio-trigger').onclick = () => { document.getElementById('new-bio-input').value = data.bio || ''; openModal('bio-modal'); };
-                    document.getElementById('profile-pic-large').onclick = () => document.getElementById('profile-pic-input').click();
-                    document.getElementById('profile-cover-photo').onclick = (e) => { if(e.target.id === 'profile-cover-photo') document.getElementById('cover-photo-input').click(); };
+                    // --- নিজের প্রোফাইল ভিউ লজিক (এখানেই ফিক্স কাজ করবে) ---
+                    
+                    // কার্সার পয়েন্টার করা
+                    profilePicEl.style.cursor = 'pointer';
+                    coverPhotoEl.style.cursor = 'pointer';
+
+                    editBioBtn.onclick = () => { document.getElementById('new-bio-input').value = data.bio || ''; openModal('bio-modal'); };
+                    
+                    // নতুন ক্লিক ইভেন্ট সেট করা
+                    profilePicEl.onclick = () => document.getElementById('profile-pic-input').click();
+                    
+                    coverPhotoEl.onclick = (e) => { 
+                        if(e.target.id === 'profile-cover-photo') document.getElementById('cover-photo-input').click(); 
+                    };
+
+                    // ইনপুট চেঞ্জ হ্যান্ডলার
                     document.getElementById('profile-pic-input').onchange = async (e) => {
                         if(e.target.files[0]) {
                             document.getElementById('pic-spinner').style.display = 'block';
-                            try { const url = await uploadToCloudinary(e.target.files[0]); await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url }); currentUserData.profilePicURL = url; document.getElementById('profile-pic-large').src = url; document.getElementById('header-profile-pic').src = url; document.getElementById('trigger-user-pic').src = url; showToast('প্রোফাইল ছবি আপডেট হয়েছে!'); } catch(err) { showToast('ব্যর্থ হয়েছে'); }
+                            try { 
+                                const url = await uploadToCloudinary(e.target.files[0]); 
+                                await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url }); 
+                                currentUserData.profilePicURL = url; 
+                                profilePicEl.src = url; 
+                                document.getElementById('header-profile-pic').src = url; 
+                                document.getElementById('trigger-user-pic').src = url; 
+                                showToast('প্রোফাইল ছবি আপডেট হয়েছে!'); 
+                            } catch(err) { showToast('ব্যর্থ হয়েছে'); }
                             document.getElementById('pic-spinner').style.display = 'none';
+                            e.target.value = ''; // ইনপুট রিসেট
                         }
                     };
+                    
                     document.getElementById('cover-photo-input').onchange = async (e) => {
                          if(e.target.files[0]) {
                             document.getElementById('cover-spinner').style.display = 'block';
-                            try { const url = await uploadToCloudinary(e.target.files[0]); await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url }); document.getElementById('profile-cover-photo').style.backgroundImage = `url(${url})`; showToast('কভার ফটো আপডেট হয়েছে!'); } catch(err) { showToast('ব্যর্থ হয়েছে'); }
+                            try { 
+                                const url = await uploadToCloudinary(e.target.files[0]); 
+                                await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url }); 
+                                coverPhotoEl.style.backgroundImage = `url(${url})`; 
+                                showToast('কভার ফটো আপডেট হয়েছে!'); 
+                            } catch(err) { showToast('ব্যর্থ হয়েছে'); }
                             document.getElementById('cover-spinner').style.display = 'none';
+                            e.target.value = ''; // ইনপুট রিসেট
                         }
                     }
                 }
