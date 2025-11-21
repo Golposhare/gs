@@ -1191,9 +1191,57 @@
             cursor: pointer;
             font-size: 20px;
         }
+
+     /* MAINTENANCE OVERLAY */
+        #maintenance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 99999; /* সবার উপরে থাকার জন্য */
+            display: flex;
+            flex-direction: column;
+            justify_content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            display: none; /* ডিফল্টভাবে লুকানো থাকবে */
+        }
+        
+        #maintenance-overlay.active {
+            display: flex; /* ক্লাস active হলে দেখাবে */
+        }
+
+        .maintenance-icon {
+            font-size: 60px;
+            color: var(--warning, #ff9800);
+            margin-bottom: 20px;
+        }
+
+        .maintenance-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .maintenance-msg {
+            color: var(--text-light);
+            font-size: 16px;
+            max-width: 500px;
+        }
     </style>
 </head>
 <body>
+    <!-- Maintenance Screen -->
+    <div id="maintenance-overlay">
+        <i class="fas fa-tools maintenance-icon"></i>
+        <div class="maintenance-title">মেইনটেন্যান্স চলছে</div>
+        <p class="maintenance-msg" id="maintenance-message-text">আমাদের অ্যাপের উন্নয়নের কাজ চলছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।</p>
+        <p style="margin-top:20px; font-weight:bold; color:#1e88e5;" id="maintenance-time-display"></p>
+    </div>
     <!-- GLOBAL LOADER to Prevent Flicker -->
     <div id="global-loader">
         <div class="loader-spinner"></div>
@@ -1707,6 +1755,7 @@
 
         let currentUserData = {};
         let activeChatUnsubscribe = null;
+        let notifUnsubscribe = null; // <--- এই লাইনটি নতুন যোগ করুন
         let sessionTimer = null; // For tracking browse time
         
         // Dynamic Points System
@@ -1883,6 +1932,10 @@
                     logout();
                 }
             } else {
+                // যদি ইউজার না থাকে, লিসেনারগুলো বন্ধ করে দিন
+                if (notifUnsubscribe) notifUnsubscribe();
+                if (activeChatUnsubscribe) activeChatUnsubscribe();
+                
                 currentUserData = {};
                 stopSessionTracking();
                 navigateTo('login-page', false);
@@ -1901,7 +1954,14 @@
 
         // --- NOTIFICATION SYSTEM ---
         function initNotificationListener(uid) {
-            db.collection('users').doc(uid).collection('notifications')
+            // আগের কোনো লিসেনার চালু থাকলে তা বন্ধ করুন
+            if (notifUnsubscribe) {
+                notifUnsubscribe();
+                notifUnsubscribe = null;
+            }
+
+            // নতুন লিসেনার ভেরিয়েবলে রাখুন
+            notifUnsubscribe = db.collection('users').doc(uid).collection('notifications')
                 .orderBy('createdAt', 'desc')
                 .limit(20)
                 .onSnapshot(snapshot => {
@@ -1933,6 +1993,9 @@
                     } else {
                         badge.classList.remove('show');
                     }
+                }, error => {
+                    // এরর হ্যান্ডলিং: যাতে কনসোলে লাল দাগ না আসে
+                    console.log("Notification listener stopped.");
                 });
         }
 
@@ -2639,21 +2702,35 @@
 
                     // ইনপুট চেঞ্জ হ্যান্ডলার
                     document.getElementById('profile-pic-input').onchange = async (e) => {
-                        if(e.target.files[0]) {
-                            document.getElementById('pic-spinner').style.display = 'block';
-                            try { 
-                                const url = await uploadToCloudinary(e.target.files[0]); 
-                                await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url }); 
-                                currentUserData.profilePicURL = url; 
-                                profilePicEl.src = url; 
-                                document.getElementById('header-profile-pic').src = url; 
-                                document.getElementById('trigger-user-pic').src = url; 
-                                showToast('প্রোফাইল ছবি আপডেট হয়েছে!'); 
-                            } catch(err) { showToast('ব্যর্থ হয়েছে'); }
-                            document.getElementById('pic-spinner').style.display = 'none';
-                            e.target.value = ''; // ইনপুট রিসেট
-                        }
-                    };
+    if(e.target.files[0]) {
+        document.getElementById('pic-spinner').style.display = 'block';
+        try { 
+            const url = await uploadToCloudinary(e.target.files[0]); 
+            
+            // ১. মেইন ইউজার ডকুমেন্ট আপডেট
+            await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url }); 
+            
+            // ২. লোকাল ভেরিয়েবল আপডেট
+            currentUserData.profilePicURL = url; 
+            profilePicEl.src = url; 
+            document.getElementById('header-profile-pic').src = url; 
+            document.getElementById('trigger-user-pic').src = url; 
+            
+            showToast('প্রোফাইল ছবি আপডেট হচ্ছে...'); 
+            
+            // ৩. সব পোস্ট এবং কমেন্ট আপডেট কল করা (NEW ADDITION)
+            await updateUserProfileGlobally({ profilePicURL: url });
+            
+            showToast('প্রোফাইল ছবি সব জায়গায় আপডেট সম্পন্ন!');
+            
+        } catch(err) { 
+            console.error(err);
+            showToast('ব্যর্থ হয়েছে'); 
+        }
+        document.getElementById('pic-spinner').style.display = 'none';
+        e.target.value = ''; // ইনপুট রিসেট
+    }
+};
                     
                     document.getElementById('cover-photo-input').onchange = async (e) => {
                          if(e.target.files[0]) {
@@ -2841,6 +2918,7 @@
         window.cancelReply = cancelReply;
 
         document.body.addEventListener('submit', async function(e){
+            // শুধুমাত্র কমেন্ট ফর্ম হলে কাজ করবে
             if(e.target.classList.contains('add-comment-form')) {
                 e.preventDefault();
                 const form = e.target;
@@ -2852,35 +2930,49 @@
                 if(!text) return;
                 const list = form.closest('.post').querySelector('.comments-list');
                 
-                // Clear input early
+                // ইনপুট রিসেট
                 input.value = '';
-                cancelReply(form.querySelector('.comment-submit-btn')); // Reset reply state
+                if(window.cancelReply) cancelReply(form.querySelector('.comment-submit-btn'));
                 
                 try {
                     const postRef = db.collection('posts').doc(postId);
                     const postDoc = await postRef.get();
+                    
+                    // ডাটাবেসে কমেন্ট সেভ করা হচ্ছে (রোল সহ)
                     await postRef.collection('comments').add({
                         text, 
                         authorUid: auth.currentUser.uid, 
                         authorName: currentUserData.fullName, 
                         authorProfilePic: currentUserData.profilePicURL,
+                        // --- এই লাইনটি রোল সেভ করবে ---
+                        authorRole: currentUserData.role || 'user', 
+                        // -----------------------------
                         isVerified: currentUserData.isVerified || false, 
                         badgeExpiry: currentUserData.badgeExpiry || null,
                         replyToId: replyId || null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
+
+                    // কমেন্ট কাউন্ট বাড়ানো
                     await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
                     
+                    // নোটিফিকেশন
                     if(replyId) {
-                         // Notify the person replied to (complex, skipping specific query for simplicity, notifying post owner is standard)
                          sendNotification(postDoc.data().authorUid, 'reply', postId);
                     } else {
                          sendNotification(postDoc.data().authorUid, 'comment', postId);
                     }
                     
+                    // পয়েন্ট আপডেট
                     updateActivityScore(auth.currentUser.uid, activityPoints.comment, 'comment');
+                    
+                    // সাথে সাথে কমেন্ট লোড করা
                     loadComments(postId, list);
-                } catch (err) { showToast('ব্যর্থ হয়েছে'); }
+
+                } catch (err) { 
+                    console.error("Comment Error:", err);
+                    showToast('কমেন্ট করতে সমস্যা হয়েছে'); 
+                }
             }
         });
 
@@ -2888,32 +2980,17 @@
             container.innerHTML = '';
             const s = await db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'asc').get();
             
-            // ১. সব কমেন্ট একটি তালিকায় নেওয়া
             let allComments = [];
             s.forEach(doc => {
                 allComments.push({ id: doc.id, ...doc.data() });
             });
 
-            // ২. যেসব কমেন্ট ডিলিট (হাইড) করা হয়েছে বা যাদের প্যারেন্ট হাইড, তাদের তালিকা তৈরি
+            // হাইড করা কমেন্ট ফিল্টার করা
             const hiddenCommentIds = new Set();
-            
-            // প্রথম ধাপ: যেগুলো সরাসরি ডিলিট করা হয়েছে
-            allComments.forEach(c => {
-                if (c.isDeleted === true) {
-                    hiddenCommentIds.add(c.id);
-                }
-            });
+            allComments.forEach(c => { if (c.isDeleted === true) hiddenCommentIds.add(c.id); });
+            allComments.forEach(c => { if (c.replyToId && hiddenCommentIds.has(c.replyToId)) hiddenCommentIds.add(c.id); });
 
-            // দ্বিতীয় ধাপ: যদি প্যারেন্ট হাইড থাকে, তবে রিপ্লাইও হাইড হবে
-            allComments.forEach(c => {
-                if (c.replyToId && hiddenCommentIds.has(c.replyToId)) {
-                    hiddenCommentIds.add(c.id);
-                }
-            });
-
-            // ৩. রেন্ডারিং (যাদের আইডি hidden লিস্টে নেই, শুধু তারাই দেখাবে)
             allComments.forEach(d => {
-                // যদি কমেন্টটি হাইড লিস্টে থাকে, তবে এটি দেখাব না
                 if (hiddenCommentIds.has(d.id)) return;
 
                 const div = document.createElement('div'); 
@@ -2923,12 +3000,18 @@
                 
                 const isMy = d.authorUid === auth.currentUser.uid;
                 const badgeHtml = getVerificationHtml(d.isVerified, d.badgeExpiry);
+                
+                // --- এই লাইনটি রোল ব্যাজ তৈরি করবে ---
+                const roleHtml = (typeof getRoleHtml === 'function') ? getRoleHtml(d.authorRole) : '';
+                // ----------------------------------
+                
                 const processedComment = processText(d.text);
                 
                 div.innerHTML = `
                     <img src="${d.authorProfilePic}" class="comment-user-pic">
                     <div class="comment-body">
-                        <strong>${d.authorName} ${badgeHtml}</strong>
+                        <!-- নামের পাশে roleHtml বসানো হলো -->
+                        <strong>${d.authorName} ${badgeHtml} ${roleHtml}</strong>
                         <span class="comment-text">${processedComment}</span>
                     </div>
                     <div class="comment-actions">
@@ -2936,28 +3019,16 @@
                         ${isMy ? `<button class="comment-action-btn del-cmt-btn"><i class="fas fa-trash"></i></button>` : ''}
                     </div>`;
                     
-                // --- হাইড (Soft Delete) লজিক ---
                 if(isMy) {
                     div.querySelector('.del-cmt-btn').onclick = async () => { 
                         if(!confirm('আপনি কি এই কমেন্টটি মুছে ফেলতে চান?')) return;
-                        
                         const btn = div.querySelector('.del-cmt-btn');
                         btn.disabled = true;
-
                         try {
-                            // ডাটা ডিলিট না করে isDeleted: true সেট করা হচ্ছে
-                            await db.collection('posts').doc(postId).collection('comments').doc(d.id).update({
-                                isDeleted: true
-                            });
-
-                            // কমেন্ট কাউন্ট কমানো
-                            await db.collection('posts').doc(postId).update({ 
-                                commentsCount: firebase.firestore.FieldValue.increment(-1) 
-                            });
-
+                            await db.collection('posts').doc(postId).collection('comments').doc(d.id).update({ isDeleted: true });
+                            await db.collection('posts').doc(postId).update({ commentsCount: firebase.firestore.FieldValue.increment(-1) });
                             showToast('কমেন্ট মুছে ফেলা হয়েছে');
-                            loadComments(postId, container); // রিফ্রেশ করলে এটি আর দেখাবে না
-
+                            loadComments(postId, container); 
                         } catch(e) {
                             console.error(e);
                             showToast('সমস্যা হয়েছে');
@@ -2975,7 +3046,24 @@
             const response = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
             const data = await response.json(); return data.secure_url;
         }
-        async function logout() { stopSessionTracking(); await auth.signOut(); navigateTo('login-page'); }
+        async function logout() { 
+            stopSessionTracking();
+            
+            // নোটিফিকেশন লিসেনার বন্ধ করা
+            if (notifUnsubscribe) {
+                notifUnsubscribe();
+                notifUnsubscribe = null;
+            }
+            
+            // চ্যাট লিসেনার বন্ধ করা
+            if (activeChatUnsubscribe) {
+                activeChatUnsubscribe();
+                activeChatUnsubscribe = null;
+            }
+
+            await auth.signOut(); 
+            navigateTo('login-page'); 
+        }
         document.getElementById('nav-logout').addEventListener('click', logout);
 
         // MODALS
@@ -2985,13 +3073,76 @@
 
         document.getElementById('open-name-modal').addEventListener('click', () => openModal('name-modal'));
         document.getElementById('save-name-btn').addEventListener('click', async () => {
-            const newName = document.getElementById('new-fullname-input').value;
-            if(newName.trim()) { await db.collection('users').doc(auth.currentUser.uid).update({ fullName: newName }); currentUserData.fullName = newName; closeModal('name-modal'); showToast('নাম পরিবর্তন হয়েছে!'); }
-        });
-        document.getElementById('save-bio-btn').addEventListener('click', async () => {
-            const bio = document.getElementById('new-bio-input').value;
-            await db.collection('users').doc(auth.currentUser.uid).update({ bio: bio }); currentUserData.bio = bio; document.getElementById('profile-bio').textContent = bio; closeModal('bio-modal'); showToast('বায়ো আপডেট হয়েছে');
-        });
+    const newName = document.getElementById('new-fullname-input').value;
+    const btn = document.getElementById('save-name-btn'); // বাটন ডিসেবল করার জন্য
+    
+    if(newName.trim()) { 
+        // বাটন লোডিং স্ট্যাটাস
+        btn.textContent = "আপডেট হচ্ছে...";
+        btn.disabled = true;
+
+        try {
+            // ১. মেইন ইউজার প্রোফাইল আপডেট
+            await db.collection('users').doc(auth.currentUser.uid).update({ fullName: newName }); 
+            currentUserData.fullName = newName; 
+            
+            // ২. পুরনো সব পোস্ট আপডেট করা (নতুন ফাংশন কল)
+            showToast('প্রোফাইল আপডেট হয়েছে! পুরনো পোস্টগুলো ঠিক করা হচ্ছে...');
+            await updateUserProfileGlobally({ fullName: newName });
+            
+            closeModal('name-modal'); 
+            showToast('নাম এবং সকল পোস্ট সফলভাবে পরিবর্তন হয়েছে!');
+            
+            // ৩. পেজ রিফ্রেশ বা নাম আপডেট দেখানো
+            document.getElementById('profile-name').innerHTML = newName + getVerificationHtml(currentUserData.isVerified, currentUserData.badgeExpiry);
+            
+            // যদি নিউজফিড খোলা থাকে তবে রিফ্রেশ করুন
+            if(!document.getElementById('home-page').classList.contains('d-none')) {
+                loadNewsfeedPosts();
+            }
+            
+        } catch (e) {
+            console.error(e);
+            showToast('সামান্য ত্রুটি হয়েছে: ' + e.message);
+        } finally {
+            btn.textContent = "সেভ করুন";
+            btn.disabled = false;
+        }
+    }
+});
+
+      // --- Bio Save Logic (New) ---
+    document.getElementById('save-bio-btn').addEventListener('click', async () => {
+        const newBio = document.getElementById('new-bio-input').value.trim();
+        const btn = document.getElementById('save-bio-btn');
+        
+        // বাটন লোডিং ইফেক্ট
+        btn.textContent = "আপডেট হচ্ছে...";
+        btn.disabled = true;
+
+        try {
+            // ১. ডাটাবেসে আপডেট করা
+            await db.collection('users').doc(auth.currentUser.uid).update({
+                bio: newBio
+            });
+
+            // ২. লোকাল ভেরিয়েবল ও প্রোফাইল পেজ আপডেট করা
+            currentUserData.bio = newBio;
+            document.getElementById('profile-bio').textContent = newBio || 'কোনো বায়ো নেই';
+            
+            // ৩. মডাল বন্ধ ও সাকসেস মেসেজ
+            closeModal('bio-modal');
+            showToast('বায়ো সফলভাবে আপডেট হয়েছে!');
+
+        } catch (e) {
+            console.error(e);
+            showToast('সমস্যা হয়েছে: ' + e.message);
+        } finally {
+            // বাটন আগের অবস্থায় ফেরত আনা
+            btn.textContent = "আপডেট";
+            btn.disabled = false;
+        }
+    });
         document.getElementById('open-password-modal').addEventListener('click', () => openModal('password-modal'));
         document.getElementById('save-pass-btn').addEventListener('click', async () => {
             const currentPass = document.getElementById('modal-current-pass').value;
@@ -3291,6 +3442,139 @@
                 showToast('সাইন আপ সফল!');
             } catch(err) { showToast(err.message); setBtnLoading('signup-btn', false); }
         });
+
+// --- NEW FUNCTION: Update User Data Globally (Posts & Comments) ---
+async function updateUserProfileGlobally(updatedData) {
+    const uid = auth.currentUser.uid;
+    const batchLimit = 400; 
+    let batch = db.batch();
+    let operationCount = 0;
+
+    console.log("Starting global update for:", updatedData);
+
+    // ১. ইউজারের সব পোস্ট আপডেট করা
+    const postsSnapshot = await db.collection('posts').where('authorUid', '==', uid).get();
+    
+    let postUpdateData = {};
+    if (updatedData.fullName) postUpdateData.authorName = updatedData.fullName;
+    if (updatedData.profilePicURL) postUpdateData.authorProfilePic = updatedData.profilePicURL;
+    if (updatedData.role) postUpdateData.authorRole = updatedData.role;
+    if (updatedData.hasOwnProperty('isVerified')) postUpdateData.isVerified = updatedData.isVerified;
+
+    if (!postsSnapshot.empty) {
+        for (const doc of postsSnapshot.docs) {
+            batch.update(doc.ref, postUpdateData);
+            operationCount++;
+
+            if (operationCount >= batchLimit) {
+                await batch.commit();
+                batch = db.batch();
+                operationCount = 0;
+            }
+        }
+    }
+
+    // ২. ইউজারের সব কমেন্ট আপডেট করা (Collection Group Query)
+    try {
+        // বি:দ্র: কনসোলে ইনডেক্স এরর আসলে লিংকে ক্লিক করে ইনডেক্স বানাতে হবে
+        const commentsSnapshot = await db.collectionGroup('comments').where('authorUid', '==', uid).get();
+
+        let commentUpdateData = {};
+        if (updatedData.fullName) commentUpdateData.authorName = updatedData.fullName;
+        if (updatedData.profilePicURL) commentUpdateData.authorProfilePic = updatedData.profilePicURL;
+        if (updatedData.hasOwnProperty('isVerified')) commentUpdateData.isVerified = updatedData.isVerified;
+
+        if (!commentsSnapshot.empty) {
+            for (const doc of commentsSnapshot.docs) {
+                batch.update(doc.ref, commentUpdateData);
+                operationCount++;
+
+                if (operationCount >= batchLimit) {
+                    await batch.commit();
+                    batch = db.batch();
+                    operationCount = 0;
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Comments update error:", error);
+        if(error.message.includes('requires an index')) {
+            showToast("Admin: Please create 'comments' index in Firebase Console.");
+        }
+    }
+
+    // বাকি থাকা ব্যাচ সেভ করা
+    if (operationCount > 0) {
+        await batch.commit();
+    }
+    
+    console.log("Global update completed!");
+}
+
+      // --- REAL-TIME MAINTENANCE SYSTEM ---
+        function initMaintenanceListener() {
+            // system কালেকশনের maintenance ডকুমেন্টের দিকে লক্ষ্য রাখা
+            db.collection('system').doc('maintenance').onSnapshot((doc) => {
+                const overlay = document.getElementById('maintenance-overlay');
+                const timeDisplay = document.getElementById('maintenance-time-display');
+                const msgDisplay = document.getElementById('maintenance-message-text');
+
+                if (doc.exists) {
+                    const data = doc.data();
+                    const isEnabled = data.enabled || false;
+                    const message = data.message || "আমাদের অ্যাপের উন্নয়নের কাজ চলছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করুন।";
+                    
+                    // সময় চেক করা (যদি এডমিন সময় সেট করে থাকে)
+                    const now = new Date().getTime();
+                    let isInTimeRange = true;
+
+                    // যদি স্টার্ট এবং এন্ড টাইম দেওয়া থাকে
+                    if (data.startTime && data.endTime) {
+                        const start = new Date(data.startTime).getTime();
+                        const end = new Date(data.endTime).getTime();
+                        
+                        // বর্তমান সময় যদি রেঞ্জের মধ্যে থাকে
+                        if (now >= start && now <= end) {
+                            isInTimeRange = true;
+                            // সময় দেখানো (অপশনাল)
+                            const endTimeStr = new Date(data.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            timeDisplay.textContent = `আনুমানিক খোলার সময়: ${endTimeStr}`;
+                        } else {
+                            isInTimeRange = false;
+                        }
+                    } else {
+                        // সময় সেট না থাকলে এবং enabled true হলে সবসময় দেখাবে
+                        timeDisplay.textContent = "";
+                    }
+
+                    // ফাইনাল লজিক: যদি enabled হয় এবং সময়ের মধ্যে থাকে
+                    if (isEnabled && isInTimeRange) {
+                        // শুধু এডমিন বাদে সবার জন্য ব্লক (অপশনাল, চাইলে এই if বাদ দিতে পারেন সব ব্লক করতে)
+                        // বর্তমানে আমি চেক করছি না ইউজার এডমিন কিনা, যাতে আপনি টেস্ট করতে পারেন।
+                        // রিয়েল টাইমে দেখানোর জন্য:
+                        msgDisplay.textContent = message;
+                        overlay.classList.add('active');
+                        
+                        // স্ক্রল বন্ধ করে দেওয়া
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        // মেইনটেন্যান্স অফ
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                } else {
+                    // ডকুমেন্ট না থাকলে অফ
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            }, (error) => {
+                console.log("Maintenance sync error:", error);
+            });
+        }
+
+        // অ্যাপ লোড হওয়ার সাথে সাথে লিসেনার চালু হবে
+        initMaintenanceListener();
+
     </script>
 </body>
 </html>
