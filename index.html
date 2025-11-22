@@ -2182,9 +2182,12 @@
             showStep(targetStep);
         }
 
-        function goToLogin() {
-            navigateTo('login-page', false);
-        }
+        // ✅ নতুন goToLogin ফাংশন (ফিক্স করা হয়েছে)
+function goToLogin() {
+    // URL থেকে #signup মুছে ফেলা হচ্ছে যাতে রিলোড দিলে সাইনআপে না যায়
+    history.pushState(null, null, window.location.pathname);
+    navigateTo('login-page', false);
+}
 
         function selectGender(val) {
             document.getElementById(`gender-${val}`).checked = true;
@@ -3978,7 +3981,7 @@ document.getElementById('inbox-btn').addEventListener('click', async () => {
             document.getElementById('signup-page').classList.remove('d-none');
         });
 
-        document.getElementById('header-logo-btn').addEventListener('click', () => navigateTo('home-page'));
+        document.getElementById('header-logo-btn').addEventListener('click', () => {navigateTo('home-page');loadNewsfeedPosts();});
         document.getElementById('nav-profile').addEventListener('click', (e) => { e.preventDefault(); loadUserProfile(auth.currentUser.uid); });
         document.getElementById('nav-settings').addEventListener('click', (e) => { e.preventDefault(); navigateTo('settings-page'); });
         document.getElementById('header-profile-pic').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('profile-dropdown').classList.toggle('show'); document.getElementById('notification-dropdown').classList.remove('show'); });
