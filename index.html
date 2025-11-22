@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <script type='text/javascript' src='//pl28088466.effectivegatecpm.com/5a/1d/6d/5a1d6d48751231c6ac0a98002c9c4efc.js'></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GolpoShare - আপনার গল্প শেয়ার করুন</title>
@@ -1234,7 +1233,6 @@
             max-width: 500px;
         }
     </style>
-    <script type='text/javascript' src='//pl28088413.effectivegatecpm.com/15/b5/aa/15b5aa6d1f71c29e658b7216f85f9314.js'></script>
 </head>
 <body>
     <!-- Maintenance Screen -->
@@ -1984,7 +1982,7 @@
                         item.className = `notification-item ${!data.read ? 'unread' : ''}`;
                         item.innerHTML = `
                             <img src="${senderPic}" class="notif-pic">
-                            <div><strong>${senderName}</strong> ${getNotifText(data.type)}</div>
+                            <div><strong>${senderName}</strong> ${getNotifText(data)}</div>
                         `;
                         item.onclick = () => handleNotificationClick(doc.id, data);
                         notifContainer.appendChild(item);
@@ -2001,31 +1999,47 @@
                 });
         }
 
-        function getNotifText(type) {
-            if (type === 'like') return 'আপনার পোস্টে লাইক দিয়েছেন।';
-            if (type === 'comment') return 'আপনার পোস্টে কমেন্ট করেছেন।';
-            if (type === 'reply') return 'আপনার কমেন্টের রিপ্লাই দিয়েছেন।';
-            if (type === 'follow') return 'আপনাকে ফলো করছেন।';
-            if (type === 'reward') return 'লিডারবোর্ড রিওয়ার্ড!';
-            if (type === 'deposit') return 'আপনার ডিপোজিট কনফার্ম হয়েছে!';
-            if (type === 'deposit_reject') return 'আপনার ডিপোজিট বাতিল হয়েছে।';
-            if (type === 'withdraw_approve') return 'টাকা উত্তোলন সম্পন্ন হয়েছে।';
-            if (type === 'withdraw_reject') return 'টাকা উত্তোলন বাতিল হয়েছে।';
-            return 'আপনাকে একটি নোটিফিকেশন পাঠিয়েছেন।';
-        }
+        function getNotifText(data) {
+    // যদি data.type না থাকে তবে ধরে নিচ্ছি data নিজেই টাইপ (পুরানো কোডের জন্য)
+    const type = data.type || data; 
+    
+    if (type === 'like') return 'আপনার পোস্টে লাইক দিয়েছেন।';
+    if (type === 'comment') return 'আপনার পোস্টে কমেন্ট করেছেন।';
+    if (type === 'reply') return 'আপনার কমেন্টের রিপ্লাই দিয়েছেন।';
+    if (type === 'follow') return 'আপনাকে ফলো করছেন।';
+    if (type === 'reward') return 'লিডারবোর্ড রিওয়ার্ড!';
+    if (type === 'deposit') return 'আপনার ডিপোজিট কনফার্ম হয়েছে!';
+    if (type === 'deposit_reject') return 'আপনার ডিপোজিট বাতিল হয়েছে।';
+    if (type === 'withdraw_approve') return 'টাকা উত্তোলন সম্পন্ন হয়েছে।';
+    if (type === 'withdraw_reject') return 'টাকা উত্তোলন বাতিল হয়েছে।';
+    
+    // নতুন: অ্যাডমিন মেসেজ হলে সেই মেসেজটাই দেখাবে
+    if (type === 'admin_msg') return data.text; 
+    
+    return 'আপনাকে একটি নোটিফিকেশন পাঠিয়েছেন।';
+}
 
         async function handleNotificationClick(docId, data) {
-            await db.collection('users').doc(auth.currentUser.uid).collection('notifications').doc(docId).update({read: true});
-            if (data.postId) navigateTo('home-page'); 
-            else if (data.senderUid) loadUserProfile(data.senderUid);
-            else if (data.type === 'deposit' || data.type === 'deposit_reject') {
-                navigateTo('subscription-page');
-                loadDepositHistory();
-            } else if (data.type.includes('withdraw')) {
-                navigateTo('withdraw-page');
-                loadWithdrawHistory();
-            }
-        }
+    await db.collection('users').doc(auth.currentUser.uid).collection('notifications').doc(docId).update({read: true});
+    
+    if (data.postId) {
+        navigateTo('home-page');
+    } 
+    else if (data.type === 'admin_msg') {
+        // নতুন: অ্যাডমিন মেসেজ হলে পপ-আপ দেখাবে
+        alert("Admin Message:\n\n" + data.text);
+    }
+    else if (data.senderUid) {
+        loadUserProfile(data.senderUid);
+    }
+    else if (data.type === 'deposit' || data.type === 'deposit_reject') {
+        navigateTo('subscription-page');
+        loadDepositHistory();
+    } else if (data.type.includes('withdraw')) {
+        navigateTo('withdraw-page');
+        loadWithdrawHistory();
+    }
+}
 
         async function sendNotification(targetUid, type, postId = null) {
             if (targetUid === auth.currentUser.uid) return;
@@ -3199,29 +3213,76 @@
 
         document.getElementById('back-from-leaderboard').addEventListener('click', () => history.back());
         
-        // INBOX LOADING - Feature 5: Load conversation based logic
-        document.getElementById('inbox-btn').addEventListener('click', async () => {
-            navigateTo('inbox-page');
-            const list = document.getElementById('inbox-list');
-            list.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
+       // UPDATED INBOX LOGIC (With Admin Fix)
+document.getElementById('inbox-btn').addEventListener('click', async () => {
+    navigateTo('inbox-page');
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = '<div style="text-align:center; padding:20px;">লোড হচ্ছে...</div>';
+    
+    try {
+        const snapshot = await db.collection('chats')
+            .where('participants', 'array-contains', auth.currentUser.uid)
+            .orderBy('lastUpdated', 'desc')
+            .limit(20)
+            .get();
+
+        list.innerHTML = '';
+        
+        if(snapshot.empty) { 
+            list.innerHTML = '<div style="text-align:center; padding:20px;">কোনো মেসেজ নেই।</div>'; 
+            return; 
+        }
+
+        for (let doc of snapshot.docs) {
+            const data = doc.data();
+            const friendUid = data.participants.find(uid => uid !== auth.currentUser.uid);
             
-            // We fallback to 'following' list as per original request logic but now allow anyone
-            // Ideally this should query 'chats' where user is participant
-            const snapshot = await db.collection('users').doc(auth.currentUser.uid).collection('following').get();
-            list.innerHTML = '';
-            if(snapshot.empty) { list.innerHTML = '<div style="text-align:center; padding:20px;">আপনি কাউকে ফলো করছেন না। প্রোফাইল থেকে মেসেজ করুন।</div>'; return; }
-            for (let doc of snapshot.docs) {
-                const friendId = doc.id;
-                const userDoc = await db.collection('users').doc(friendId).get();
+            if(friendUid) {
+                const userDoc = await db.collection('users').doc(friendUid).get();
+                
+                // --> পরিবর্তন শুরু এখান থেকে <--
+                let u;
+                
                 if(userDoc.exists) {
-                    const u = userDoc.data();
-                    const item = document.createElement('div'); item.className = 'inbox-item';
-                    item.innerHTML = `<img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" style="width:50px; height:50px; border-radius:50%; margin-right:15px;"><div><h4 style="font-size:16px;">${u.fullName}</h4><p style="color:#777; font-size:12px;">চ্যাট করতে ট্যাপ করুন</p></div>`;
-                    item.onclick = () => openChat(friendId, u.fullName, u.profilePicURL, u.isVerified, u.badgeExpiry);
-                    list.appendChild(item);
+                    // যদি সাধারণ ইউজার হয়
+                    u = userDoc.data();
+                } else {
+                    // যদি ইউজার না পাওয়া যায় (মানে এটি অ্যাডমিন)
+                    u = {
+                        fullName: "Admin Team",
+                        profilePicURL: "https://cdn-icons-png.flaticon.com/512/9703/9703596.png", // ডিফল্ট এডমিন আইকন
+                        role: 'admin',
+                        isVerified: true
+                    };
                 }
+                // --> পরিবর্তন শেষ <--
+
+                const badge = (u.role === 'admin') ? ' <span class="role-badge role-admin">Admin</span>' : '';
+                
+                const item = document.createElement('div'); 
+                item.className = 'inbox-item';
+                item.innerHTML = `
+                    <img src="${u.profilePicURL || DEFAULT_PROFILE_PIC}" style="width:50px; height:50px; border-radius:50%; margin-right:15px; object-fit:cover;">
+                    <div style="flex-grow:1;">
+                        <h4 style="font-size:16px;">${u.fullName}${badge}</h4>
+                        <p style="color:#777; font-size:12px;">মেসেজ দেখতে ট্যাপ করুন</p>
+                    </div>
+                `;
+                
+                // চ্যাট ওপেন করার সময় নাম ও ছবি পাঠানো হচ্ছে
+                item.onclick = () => openChat(friendUid, u.fullName, u.profilePicURL, u.isVerified, null);
+                list.appendChild(item);
             }
-        });
+        }
+    } catch (error) {
+        console.error(error);
+        if(error.message.includes('index')) {
+             // মোবাইলে এলার্ট দিলে বুঝতে সুবিধা হবে
+             alert("System Error: Index not found. Please create index in Firebase Console.");
+        }
+        list.innerHTML = '<div style="text-align:center; padding:20px; color:red;">লোড হতে সমস্যা হচ্ছে।</div>';
+    }
+});
         
         // Feature 2: Chat Image Logic
         document.getElementById('chat-img-btn').addEventListener('click', () => {
@@ -3578,5 +3639,37 @@ async function updateUserProfileGlobally(updatedData) {
         initMaintenanceListener();
 
     </script>
+   <script>
+    // --- ADSTERRA AUTO LOADER ---
+    document.addEventListener("DOMContentLoaded", async function() {
+        try {
+            // ১. ফায়ারবেস থেকে লিংক আনা
+            const doc = await db.collection('system').doc('ads_config').get();
+            if(doc.exists) {
+                const data = doc.data();
+
+                // ২. Popunder অ্যাড চালু থাকলে হেড-এ বসানো
+                if(data.popStatus === 'on' && data.popLink) {
+                    let s = document.createElement('script');
+                    s.type = 'text/javascript';
+                    s.src = data.popLink;
+                    document.head.appendChild(s);
+                    console.log("Popunder Active");
+                }
+
+                // ৩. Social Bar অ্যাড চালু থাকলে বডি-তে বসানো
+                if(data.socialStatus === 'on' && data.socialLink) {
+                    let s = document.createElement('script');
+                    s.type = 'text/javascript';
+                    s.src = data.socialLink;
+                    document.body.appendChild(s);
+                    console.log("Social Bar Active");
+                }
+            }
+        } catch(e) {
+            console.log("Ads Error: " + e.message);
+        }
+    });
+</script>
 </body>
 </html>
