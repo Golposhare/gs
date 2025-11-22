@@ -2332,13 +2332,14 @@
             setTimeout(() => window.location.reload(), 500); 
         }
 
-        // --- AUTH & INIT ---
+        // --- AUTH & INIT (RELOAD FIX ADDED) ---
         auth.onAuthStateChanged(async user => {
+            // ১. ব্রাউজারের বর্তমান হ্যাশ (URL এর # এর পরের অংশ) চেক করি
+            const currentHash = window.location.hash.replace('#', '');
+
             if (user) {
-                // ---> নতুন লাইন শুরু <---
-                // সাইনআপ চলাকালীন এটি আপনাকে হোম পেজে যেতে বাধা দিবে
+                // সাইনআপ উইজার্ড চলাকালীন থাকলে কিছু করার দরকার নেই
                 if (isInSignupWizard) return; 
-                // ---> নতুন লাইন শেষ <---
 
                 await loadSystemSettings();
                 const userDoc = await db.collection('users').doc(user.uid).get();
@@ -2356,23 +2357,91 @@
                     initNotificationListener(user.uid);
                     startSessionTracking(user.uid);
 
-                    // অ্যাড লোড করা
+                    // অ্যাড লোড করা (যদি থাকে)
                     checkAndLoadAds(currentUserData.role);
 
-                    navigateTo('home-page');
-                    loadNewsfeedPosts(); 
+                    // ---> RELOAD PROTECTION LOGIC START <---
+                    // ইউজার লগইন আছে, এখন দেখবো সে কোন পেজে ছিল
+                    if (currentHash && currentHash !== 'login' && currentHash !== 'signup') {
+                        
+                        const targetPageId = currentHash + '-page'; // যেমন: wallet-page
+                        const pageExists = document.getElementById(targetPageId);
+
+                        if (pageExists) {
+                            // ১. পেজ নেভিগেট করা (হিস্ট্রিতে নতুন এন্ট্রি ছাড়া)
+                            navigateTo(targetPageId, false);
+
+                            // ২. পেজ অনুযায়ী ডাটা লোড করা
+                            switch (currentHash) {
+                                case 'profile':
+                                    loadUserProfile(user.uid);
+                                    break;
+                                case 'wallet':
+                                    loadWallet();
+                                    break;
+                                case 'leaderboard':
+                                    loadLeaderboard();
+                                    break;
+                                case 'inbox':
+                                    document.getElementById('inbox-btn').click();
+                                    break;
+                                case 'withdraw':
+                                    loadWithdrawHistory();
+                                    break;
+                                case 'subscription':
+                                    loadDepositHistory();
+                                    break;
+                                case 'hidden-posts':
+                                    loadHiddenPosts();
+                                    break;
+                                case 'settings':
+                                    break;
+                                case 'chat':
+                                    // চ্যাট পেজে রিলোড দিলে ইনবক্সে পাঠানো হবে
+                                    navigateTo('inbox-page', false);
+                                    document.getElementById('inbox-btn').click();
+                                    break;
+                                default:
+                                    loadNewsfeedPosts();
+                                    break;
+                            }
+                        } else {
+                            // পেজ না থাকলে হোম
+                            navigateTo('home-page', false);
+                            loadNewsfeedPosts();
+                        }
+                    } else {
+                        // কোনো হ্যাশ না থাকলে হোম
+                        navigateTo('home-page', false);
+                        loadNewsfeedPosts();
+                    }
+                    // ---> RELOAD PROTECTION LOGIC END <---
+
                 } else {
-                    // ইউজারের ডাটা না পেলে লগআউট
                     logout();
                 }
             } else {
-                // ইউজার না থাকলে লগইন পেজে পাঠানো
+                // ইউজার লগইন নেই
                 if (notifUnsubscribe) notifUnsubscribe();
                 if (activeChatUnsubscribe) activeChatUnsubscribe();
                 
                 currentUserData = {};
                 stopSessionTracking();
-                navigateTo('login-page', false);
+
+                // ---> SIGNUP PAGE RELOAD FIX <---
+                if (currentHash === 'signup') {
+                    // সাইনআপ পেজে ছিল, তাই সাইনআপ পেজেই রাখা হবে
+                    signupData = { fullname: '', dob: '', gender: '', email: '', password: '' };
+                    showStep(1);
+                    
+                    document.querySelectorAll('.app-view, .chat-interface').forEach(el => el.classList.add('d-none'));
+                    document.getElementById('app-header').classList.add('d-none');
+                    document.getElementById('login-page').classList.add('d-none');
+                    document.getElementById('signup-page').classList.remove('d-none');
+                } else {
+                    // অন্য সব ক্ষেত্রে লগইন পেজ
+                    navigateTo('login-page', false);
+                }
             }
             
             setTimeout(() => {
@@ -3894,15 +3963,21 @@ document.getElementById('inbox-btn').addEventListener('click', async () => {
             }
         });
 
-        // ✅ নতুন লাইন (বসিয়ে দিন)
-document.getElementById('go-to-signup').addEventListener('click', (e) => { 
-    e.preventDefault(); 
-    // পুরনো ডাটা রিসেট করা
-    signupData = { fullname: '', dob: '', gender: '', email: '', password: '' };
-    // ১ নম্বর স্টেপ দেখানো
-    showStep(1);
-    navigateTo('signup-page', false); 
-});
+      // ✅ সাইনআপ বাটন আপডেট (RELOAD FIX)
+        document.getElementById('go-to-signup').addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            
+            // URL এ #signup যুক্ত করা, যাতে রিলোড দিলে এখানেই থাকে
+            history.pushState({ page: 'signup-page' }, "", "#signup");
+
+            signupData = { fullname: '', dob: '', gender: '', email: '', password: '' };
+            showStep(1);
+            
+            // ম্যানুয়ালি পেজ শো করা
+            document.getElementById('login-page').classList.add('d-none');
+            document.getElementById('signup-page').classList.remove('d-none');
+        });
+
         document.getElementById('header-logo-btn').addEventListener('click', () => navigateTo('home-page'));
         document.getElementById('nav-profile').addEventListener('click', (e) => { e.preventDefault(); loadUserProfile(auth.currentUser.uid); });
         document.getElementById('nav-settings').addEventListener('click', (e) => { e.preventDefault(); navigateTo('settings-page'); });
