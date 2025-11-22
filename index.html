@@ -93,6 +93,7 @@
         .role-moderator { background-color: #2e7d32; } /* Green */
         .role-adviser { background-color: #fbc02d; color: #000; } /* Yellow */
         .role-editor { background-color: #1565c0; }    /* Blue */
+        .role-premium { background-color: #9c27b0; } /* Premium (Purple) */
 
         /* Pending Badge */
         .pending-badge {
@@ -1925,7 +1926,12 @@
                     currentUserData = data;
                     updateHeaderProfile(currentUserData);
                     initNotificationListener(user.uid);
-                    startSessionTracking(user.uid); 
+                    startSessionTracking(user.uid);
+
+       // --- অ্যাড লোড করার নতুন নিয়ম ---
+            checkAndLoadAds(currentUserData.role);
+            // ---------------------------
+
                     navigateTo('home-page');
                     loadNewsfeedPosts(); 
                 } else {
@@ -3065,20 +3071,14 @@
         async function logout() { 
             stopSessionTracking();
             
-            // নোটিফিকেশন লিসেনার বন্ধ করা
-            if (notifUnsubscribe) {
-                notifUnsubscribe();
-                notifUnsubscribe = null;
-            }
-            
-            // চ্যাট লিসেনার বন্ধ করা
-            if (activeChatUnsubscribe) {
-                activeChatUnsubscribe();
-                activeChatUnsubscribe = null;
-            }
+            // লিসেনারগুলো নাল করে দেওয়া
+            if (notifUnsubscribe) notifUnsubscribe = null;
+            if (activeChatUnsubscribe) activeChatUnsubscribe = null;
 
             await auth.signOut(); 
-            navigateTo('login-page'); 
+            
+            // পেজ রিলোড দেওয়া হচ্ছে যাতে অ্যাডস মেমোরি থেকে মুছে যায়
+            window.location.reload(); 
         }
         document.getElementById('nav-logout').addEventListener('click', logout);
 
@@ -3639,37 +3639,54 @@ async function updateUserProfileGlobally(updatedData) {
         initMaintenanceListener();
 
     </script>
-   <script>
-    // --- ADSTERRA AUTO LOADER ---
-    document.addEventListener("DOMContentLoaded", async function() {
+<script>
+    // --- NEW SMART ADSTERRA LOADER (Role Based) ---
+    // এই ফাংশনটি অটোমেটিক কল হবে না, আমরা লগইন হওয়ার পর কল করবো
+    async function checkAndLoadAds(userRole) {
+        const role = userRole || 'user'; 
+        
+        // ১. সাধারণ 'user' ছাড়া অন্য কোনো রোলে অ্যাড দেখাবে না
+        // Premium, Admin, Moderator - এরা অ্যাড দেখবে না
+        if (role !== 'user') {
+            console.log("Premium/Admin User Detected. No Ads will be shown.");
+            return; 
+        }
+
+        console.log("Normal User Detected. Loading Ads...");
+
         try {
-            // ১. ফায়ারবেস থেকে লিংক আনা
+            // ফায়ারবেস থেকে অ্যাডের লিংক আনা
             const doc = await db.collection('system').doc('ads_config').get();
             if(doc.exists) {
                 const data = doc.data();
 
-                // ২. Popunder অ্যাড চালু থাকলে হেড-এ বসানো
+                // Popunder অ্যাড বসানো (যদি অন থাকে)
                 if(data.popStatus === 'on' && data.popLink) {
-                    let s = document.createElement('script');
-                    s.type = 'text/javascript';
-                    s.src = data.popLink;
-                    document.head.appendChild(s);
-                    console.log("Popunder Active");
+                    // ডুপ্লিকেট যাতে না হয় তাই চেক করা হচ্ছে
+                    if (!document.getElementById('adsterra-pop')) { 
+                        let s = document.createElement('script');
+                        s.type = 'text/javascript';
+                        s.src = data.popLink;
+                        s.id = 'adsterra-pop';
+                        document.head.appendChild(s);
+                    }
                 }
 
-                // ৩. Social Bar অ্যাড চালু থাকলে বডি-তে বসানো
+                // Social Bar অ্যাড বসানো (যদি অন থাকে)
                 if(data.socialStatus === 'on' && data.socialLink) {
-                    let s = document.createElement('script');
-                    s.type = 'text/javascript';
-                    s.src = data.socialLink;
-                    document.body.appendChild(s);
-                    console.log("Social Bar Active");
+                    if (!document.getElementById('adsterra-social')) { 
+                        let s = document.createElement('script');
+                        s.type = 'text/javascript';
+                        s.src = data.socialLink;
+                        s.id = 'adsterra-social';
+                        document.body.appendChild(s);
+                    }
                 }
             }
         } catch(e) {
             console.log("Ads Error: " + e.message);
         }
-    });
+    }
 </script>
 </body>
 </html>
