@@ -1233,6 +1233,113 @@
             font-size: 16px;
             max-width: 500px;
         }
+   
+    /* --- WIZARD SIGNUP STYLES --- */
+        .wizard-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .wizard-step {
+            display: none; /* JS দিয়ে কন্ট্রোল করা হবে */
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+        .wizard-step.active {
+            display: flex;
+        }
+        .wizard-header {
+            margin-bottom: 20px;
+        }
+        .wizard-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        .wizard-subtitle {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .wizard-input-box {
+            margin-bottom: 20px;
+        }
+        .wizard-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        /* Full Width Button */
+        .btn-full {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 25px; /* Facebook style rounded */
+            margin-top: 10px;
+        }
+        .btn-secondary {
+            background-color: #e4e6eb;
+            color: black;
+        }
+        .btn-secondary:hover { background-color: #d8dadf; }
+        
+        /* Radio Options for Gender */
+        .gender-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .gender-option label { flex-grow: 1; cursor: pointer; }
+        
+        /* Upload Circles */
+        .upload-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            border: 2px dashed var(--primary);
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-circle img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .upload-rect {
+            width: 100%;
+            height: 200px; /* 16:9 approx ratio for cover */
+            background: #f0f2f5;
+            border: 2px dashed var(--primary);
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .upload-rect img { width: 100%; height: 100%; object-fit: cover; }
+
+        .back-btn-top {
+            background: none;
+            border: none;
+            font-size: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -1252,53 +1359,158 @@
     <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <!-- Sign Up Page -->
-    <div id="signup-page" class="auth-container d-none">
-        <div class="auth-card">
-            <div class="logo">
-                <h1>GolpoShare</h1>
-                <p>আপনার গল্প শেয়ার করুন</p>
+    <!-- WIZARD SIGN UP PAGE -->
+    <div id="signup-page" class="auth-container d-none" style="background: white; color: black; justify-content: flex-start; padding-top: 20px;">
+        <div class="wizard-container">
+            
+            <!-- Step 1: Name -->
+            <div id="step-1" class="wizard-step active">
+                <button class="back-btn-top" onclick="goToLogin()"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">What's your name?</div>
+                    <div class="wizard-subtitle">Enter the name you use in real life.</div>
+                </div>
+                <div class="wizard-input-box">
+                    <label class="wizard-label">Full Name</label>
+                    <input type="text" id="wiz-fullname" class="form-control" placeholder="Enter your full name" required>
+                </div>
+                <button class="btn btn-full" onclick="nextStep(2)">Next</button>
             </div>
-            <form id="signup-form">
-                <div class="form-group">
-                    <label for="fullname">পুরো নাম</label>
-                    <input type="text" id="fullname" class="form-control" placeholder="আপনার পুরো নাম লিখুন" required>
+
+            <!-- Step 2: DOB -->
+            <div id="step-2" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">What's your birthday?</div>
+                    <div class="wizard-subtitle">Choose your date of birth.</div>
                 </div>
-                <div class="form-group">
-                    <label for="dob">জন্ম তারিখ</label>
-                    <input type="date" id="dob" class="form-control" required>
+                <div class="wizard-input-box">
+                    <label class="wizard-label">Date of birth</label>
+                    <input type="date" id="wiz-dob" class="form-control" required>
                 </div>
-                <div class="form-group">
-                    <label for="gender">লিঙ্গ</label>
-                    <select id="gender" class="form-control" required>
-                        <option value="">লিঙ্গ নির্বাচন করুন</option>
-                        <option value="male">পুরুষ</option>
-                        <option value="female">মহিলা</option>
-                        <option value="other">অন্যান্য</option>
-                    </select>
+                <button class="btn btn-full" onclick="nextStep(3)">Next</button>
+            </div>
+
+            <!-- Step 3: Gender -->
+            <div id="step-3" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">What's your gender?</div>
+                    <div class="wizard-subtitle">You can change who sees your gender on your profile later.</div>
                 </div>
-                <div class="form-group">
-                    <label for="email">ইমেইল</label>
-                    <input type="email" id="email" class="form-control" placeholder="আপনার ইমেইল লিখুন" required>
+                <div class="wizard-input-box">
+                    <div class="gender-option" onclick="selectGender('female')">
+                        <label>Female</label>
+                        <input type="radio" name="gender" value="female" id="gender-female">
+                    </div>
+                    <div class="gender-option" onclick="selectGender('male')">
+                        <label>Male</label>
+                        <input type="radio" name="gender" value="male" id="gender-male">
+                    </div>
+                    <div class="gender-option" onclick="selectGender('other')">
+                        <label>Others</label>
+                        <input type="radio" name="gender" value="other" id="gender-other">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">পাসওয়ার্ড</label>
-                    <input type="password" id="password" class="form-control" placeholder="পাসওয়ার্ড লিখুন" required>
+                <button class="btn btn-full" onclick="nextStep(4)">Next</button>
+            </div>
+
+            <!-- Step 4: Email -->
+            <div id="step-4" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">What's your email?</div>
+                    <div class="wizard-subtitle">Enter the email where you can be contacted.</div>
                 </div>
-                <div class="form-group">
-                    <label for="profile-pic-signup">প্রোফাইল ছবি</label>
-                    <input type="file" id="profile-pic-signup" class="form-control" accept="image/*">
+                <div class="wizard-input-box">
+                    <label class="wizard-label">Email</label>
+                    <input type="email" id="wiz-email" class="form-control" placeholder="Enter your email" required>
+                    <small style="color: red; display:none;" id="email-error">Only @gmail.com or @exdonuts.com allowed</small>
                 </div>
-                <div class="form-group">
-                    <label for="cover-photo-signup">কভার ফটো</label>
-                    <input type="file" id="cover-photo-signup" class="form-control" accept="image/*">
+                <button class="btn btn-full" onclick="nextStep(5)">Next</button>
+            </div>
+
+            <!-- Step 5: Password -->
+            <div id="step-5" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(4)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">Create a password</div>
+                    <div class="wizard-subtitle">Create a password with at least 6 letters or numbers. It should be something others can't guess.</div>
                 </div>
-                <button type="submit" class="btn" id="signup-btn">
-                    <span class="btn-text">সাইন আপ</span>
+                <div class="wizard-input-box">
+                    <label class="wizard-label">Password</label>
+                    <input type="password" id="wiz-password" class="form-control" placeholder="Password" required>
+                </div>
+                <button class="btn btn-full" onclick="nextStep(6)">Next</button>
+            </div>
+
+            <!-- Step 6: Save Info -->
+            <div id="step-6" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(5)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">Save your login info?</div>
+                    <div class="wizard-subtitle">We'll save the login info for your new account, so you won't need to enter it next time you log in.</div>
+                </div>
+                <button class="btn btn-full" onclick="nextStep(7)">Save</button>
+                <button class="btn btn-full btn-secondary" onclick="nextStep(7)">Not Now</button>
+            </div>
+
+            <!-- Step 7: Terms -->
+            <div id="step-7" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(6)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">GolpoShare – Terms & Privacy Policy</div>
+                </div>
+                <div style="font-size: 13px; color: #666; margin-bottom: 20px; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+                    <p><strong>Terms:</strong> Use GolpoShare responsibly. Do not post harmful, illegal, or copyrighted content. We may remove content or suspend accounts that break the rules.</p>
+                    <br>
+                    <p><strong>Privacy:</strong> We collect minimal data to run the app. Your information is kept secure and never sold. You can request data or account deletion anytime.</p>
+                </div>
+                <button class="btn btn-full" id="i-agree-btn" onclick="createAccount()">
+                    <span class="btn-text">I agree</span>
                     <span class="btn-spinner"></span>
                 </button>
-            </form>
-            <p class="text-center mt-3">ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="#" id="go-to-login">লগইন করুন</a></p>
+            </div>
+
+            <!-- Step 8: Email Verify -->
+            <div id="step-8" class="wizard-step">
+                <div class="wizard-header" style="text-align: center;">
+                    <i class="fas fa-envelope-open-text" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
+                    <div class="wizard-title">Verify Your Email</div>
+                    <div class="wizard-subtitle" id="verify-msg">We have sent a verification link to your email. Please verify to continue.</div>
+                </div>
+                <button class="btn btn-full" id="check-verify-btn" onclick="checkVerification()">I have Verified</button>
+                <button class="btn btn-full btn-secondary" onclick="resendVerification()">Resend Email</button>
+            </div>
+
+            <!-- Step 9: Profile Photo -->
+            <div id="step-9" class="wizard-step">
+                <div class="wizard-header">
+                    <div class="wizard-title">Upload Your Profile Photo</div>
+                </div>
+                <div class="upload-circle" onclick="document.getElementById('wiz-pic-input').click()">
+                    <img src="https://res.cloudinary.com/dzmo138qb/image/upload/v1763471321/images_19_iteqms.jpg" id="wiz-pic-preview">
+                    <input type="file" id="wiz-pic-input" accept="image/*" style="display:none;" onchange="previewWizardImage(this, 'wiz-pic-preview', 'wiz-pic-next')">
+                    <div style="position: absolute;" id="wiz-pic-loader" class="d-none"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <button class="btn btn-full" id="wiz-pic-next" onclick="uploadProfilePic()">Skip</button>
+            </div>
+
+            <!-- Step 10: Cover Photo -->
+            <div id="step-10" class="wizard-step">
+                <button class="back-btn-top" onclick="prevStep(9)"><i class="fas fa-arrow-left"></i></button>
+                <div class="wizard-header">
+                    <div class="wizard-title">Upload Cover Photo</div>
+                </div>
+                <div class="upload-rect" onclick="document.getElementById('wiz-cover-input').click()">
+                    <img src="" id="wiz-cover-preview" style="display:none;">
+                    <span id="wiz-cover-placeholder" style="color:#aaa;">640 x 360 pixels</span>
+                    <input type="file" id="wiz-cover-input" accept="image/*" style="display:none;" onchange="previewWizardImage(this, 'wiz-cover-preview', 'wiz-cover-next', true)">
+                    <div style="position: absolute;" id="wiz-cover-loader" class="d-none"><i class="fas fa-spinner fa-spin"></i></div>
+                </div>
+                <button class="btn btn-full" id="wiz-cover-next" onclick="finishSignup()">Skip</button>
+            </div>
+
         </div>
     </div>
 
@@ -1909,9 +2121,225 @@
             }
         };
 
+    // --- WIZARD LOGIC VARIABLES ---
+        let signupData = {
+            fullname: '',
+            dob: '',
+            gender: '',
+            email: '',
+            password: ''
+        };
+        let isInSignupWizard = false; // অটোলগইন আটকাতে ফ্ল্যাগ
+
+        // --- WIZARD NAVIGATION FUNCTIONS ---
+        function showStep(stepNum) {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+            // Show target step
+            document.getElementById(`step-${stepNum}`).classList.add('active');
+        }
+
+        function nextStep(targetStep) {
+            // Validation Logic before moving
+            if (targetStep === 2) {
+                const name = document.getElementById('wiz-fullname').value.trim();
+                if (!name) return showToast("Please enter your name");
+                signupData.fullname = name;
+            }
+            if (targetStep === 3) {
+                const dob = document.getElementById('wiz-dob').value;
+                if (!dob) return showToast("Select date of birth");
+                signupData.dob = dob;
+            }
+            if (targetStep === 4) {
+                const genderEl = document.querySelector('input[name="gender"]:checked');
+                if (!genderEl) return showToast("Select your gender");
+                signupData.gender = genderEl.value;
+            }
+            if (targetStep === 5) {
+                const email = document.getElementById('wiz-email').value.trim().toLowerCase();
+                const errorMsg = document.getElementById('email-error');
+                if (!email) return showToast("Enter email address");
+                
+                // Custom Email Validation
+                if (!email.endsWith('@gmail.com') && !email.endsWith('@exdonuts.com')) {
+                    errorMsg.style.display = 'block';
+                    return;
+                }
+                errorMsg.style.display = 'none';
+                signupData.email = email;
+            }
+            if (targetStep === 6) {
+                const pass = document.getElementById('wiz-password').value;
+                if (pass.length < 6) return showToast("Password must be at least 6 characters");
+                signupData.password = pass;
+            }
+            
+            showStep(targetStep);
+        }
+
+        function prevStep(targetStep) {
+            showStep(targetStep);
+        }
+
+        function goToLogin() {
+            navigateTo('login-page', false);
+        }
+
+        function selectGender(val) {
+            document.getElementById(`gender-${val}`).checked = true;
+        }
+
+        // --- ACCOUNT CREATION LOGIC ---
+        async function createAccount() {
+            const btn = document.getElementById('i-agree-btn');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.btn-spinner').style.display = 'block';
+
+            isInSignupWizard = true; // Flag to prevent auto-redirect to home
+
+            try {
+                // 1. Create Auth User
+                const cred = await auth.createUserWithEmailAndPassword(signupData.email, signupData.password);
+                
+                // 2. Send Verification Email
+                await cred.user.sendEmailVerification();
+
+                // 3. Save Initial Data to Firestore
+                await db.collection('users').doc(cred.user.uid).set({
+                    uid: cred.user.uid,
+                    fullName: signupData.fullname,
+                    email: signupData.email,
+                    dob: signupData.dob,
+                    gender: signupData.gender,
+                    profilePicURL: DEFAULT_PROFILE_PIC,
+                    coverPhotoURL: '',
+                    followingCount: 0,
+                    followerCount: 0,
+                    totalLikes: 0,
+                    bio: '',
+                    walletBalance: 0.00,
+                    role: 'user',
+                    isVerified: false,
+                    isDisabled: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showToast("Account Created! Please verify email.");
+                nextStep(8); // Go to Verify Step
+
+            } catch (error) {
+                console.error(error);
+                showToast(error.message);
+                btn.disabled = false;
+                btn.querySelector('.btn-text').style.display = 'block';
+                btn.querySelector('.btn-spinner').style.display = 'none';
+                isInSignupWizard = false;
+            }
+        }
+
+        // --- EMAIL VERIFICATION LOGIC ---
+        async function resendVerification() {
+            if(auth.currentUser) {
+                await auth.currentUser.sendEmailVerification();
+                showToast("Verification email resent!");
+            }
+        }
+
+        async function checkVerification() {
+            const btn = document.getElementById('check-verify-btn');
+            btn.innerText = "Checking...";
+            
+            if(auth.currentUser) {
+                await auth.currentUser.reload(); // Refresh user state
+                if(auth.currentUser.emailVerified) {
+                    showToast("Email Verified!");
+                    nextStep(9); // Go to Profile Pic
+                } else {
+                    showToast("Email not verified yet. Check inbox/spam.");
+                    btn.innerText = "I have Verified";
+                }
+            }
+        }
+
+        // --- IMAGE UPLOAD LOGIC FOR WIZARD ---
+        function previewWizardImage(input, previewId, btnId, isCover = false) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if(isCover) document.getElementById('wiz-cover-placeholder').style.display = 'none';
+                    
+                    const btn = document.getElementById(btnId);
+                    btn.innerText = "Upload & Next";
+                    btn.classList.remove('btn-secondary');
+                    btn.classList.add('btn-full');
+                    btn.onclick = isCover ? finishSignup : uploadProfilePic; // Reset onclick to upload function
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function uploadProfilePic() {
+            const input = document.getElementById('wiz-pic-input');
+            if (!input.files[0]) {
+                nextStep(10); // Skip
+                return;
+            }
+
+            const btn = document.getElementById('wiz-pic-next');
+            btn.disabled = true;
+            btn.innerText = "Uploading...";
+            document.getElementById('wiz-pic-loader').classList.remove('d-none');
+
+            try {
+                const url = await uploadToCloudinary(input.files[0]);
+                await db.collection('users').doc(auth.currentUser.uid).update({ profilePicURL: url });
+                nextStep(10);
+            } catch (e) {
+                showToast("Upload failed");
+            } finally {
+                document.getElementById('wiz-pic-loader').classList.add('d-none');
+            }
+        }
+
+        async function finishSignup() {
+            const input = document.getElementById('wiz-cover-input');
+            
+            if (input.files[0]) {
+                const btn = document.getElementById('wiz-cover-next');
+                btn.disabled = true;
+                btn.innerText = "Uploading...";
+                document.getElementById('wiz-cover-loader').classList.remove('d-none');
+                
+                try {
+                    const url = await uploadToCloudinary(input.files[0]);
+                    await db.collection('users').doc(auth.currentUser.uid).update({ coverPhotoURL: url });
+                } catch (e) {
+                    showToast("Cover upload failed");
+                }
+            }
+
+            // FINAL STEP: Reset Flag and Go Home
+            isInSignupWizard = false;
+            showToast("Setup Complete!");
+            navigateTo('home-page');
+            
+            // Force reload to fetch new data and remove signup UI cleanly
+            setTimeout(() => window.location.reload(), 500); 
+        }
+
         // --- AUTH & INIT ---
         auth.onAuthStateChanged(async user => {
             if (user) {
+                // ---> নতুন লাইন শুরু <---
+                // সাইনআপ চলাকালীন এটি আপনাকে হোম পেজে যেতে বাধা দিবে
+                if (isInSignupWizard) return; 
+                // ---> নতুন লাইন শেষ <---
+
                 await loadSystemSettings();
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 
@@ -1928,17 +2356,17 @@
                     initNotificationListener(user.uid);
                     startSessionTracking(user.uid);
 
-       // --- অ্যাড লোড করার নতুন নিয়ম ---
-            checkAndLoadAds(currentUserData.role);
-            // ---------------------------
+                    // অ্যাড লোড করা
+                    checkAndLoadAds(currentUserData.role);
 
                     navigateTo('home-page');
                     loadNewsfeedPosts(); 
                 } else {
+                    // ইউজারের ডাটা না পেলে লগআউট
                     logout();
                 }
             } else {
-                // যদি ইউজার না থাকে, লিসেনারগুলো বন্ধ করে দিন
+                // ইউজার না থাকলে লগইন পেজে পাঠানো
                 if (notifUnsubscribe) notifUnsubscribe();
                 if (activeChatUnsubscribe) activeChatUnsubscribe();
                 
@@ -3466,9 +3894,15 @@ document.getElementById('inbox-btn').addEventListener('click', async () => {
             }
         });
 
-        // Auth Navigation & Forms
-        document.getElementById('go-to-login').addEventListener('click', (e) => { e.preventDefault(); navigateTo('login-page', false); });
-        document.getElementById('go-to-signup').addEventListener('click', (e) => { e.preventDefault(); navigateTo('signup-page', false); });
+        // ✅ নতুন লাইন (বসিয়ে দিন)
+document.getElementById('go-to-signup').addEventListener('click', (e) => { 
+    e.preventDefault(); 
+    // পুরনো ডাটা রিসেট করা
+    signupData = { fullname: '', dob: '', gender: '', email: '', password: '' };
+    // ১ নম্বর স্টেপ দেখানো
+    showStep(1);
+    navigateTo('signup-page', false); 
+});
         document.getElementById('header-logo-btn').addEventListener('click', () => navigateTo('home-page'));
         document.getElementById('nav-profile').addEventListener('click', (e) => { e.preventDefault(); loadUserProfile(auth.currentUser.uid); });
         document.getElementById('nav-settings').addEventListener('click', (e) => { e.preventDefault(); navigateTo('settings-page'); });
@@ -3483,28 +3917,7 @@ document.getElementById('inbox-btn').addEventListener('click', async () => {
             catch(err) { showToast(err.message); setBtnLoading('login-btn', false); }
         });
 
-        document.getElementById('signup-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            setBtnLoading('signup-btn', true);
-            try {
-                const fullname = document.getElementById('fullname').value;
-                const dob = document.getElementById('dob').value;
-                const gender = document.getElementById('gender').value;
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
-                let picUrl = DEFAULT_PROFILE_PIC, coverUrl = '';
-                if(document.getElementById('profile-pic-signup').files[0]) picUrl = await uploadToCloudinary(document.getElementById('profile-pic-signup').files[0]);
-                if(document.getElementById('cover-photo-signup').files[0]) coverUrl = await uploadToCloudinary(document.getElementById('cover-photo-signup').files[0]);
-                
-                // Assign default role 'user'
-                await db.collection('users').doc(cred.user.uid).set({
-                    uid: cred.user.uid, fullName: fullname, email: email, dob: dob, gender: gender,
-                    profilePicURL: picUrl, coverPhotoURL: coverUrl, followingCount: 0, followerCount: 0, totalLikes: 0, bio: '', walletBalance: 0.00, role: 'user', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showToast('সাইন আপ সফল!');
-            } catch(err) { showToast(err.message); setBtnLoading('signup-btn', false); }
-        });
+     
 
 // --- NEW FUNCTION: Update User Data Globally (Posts & Comments) ---
 async function updateUserProfileGlobally(updatedData) {
